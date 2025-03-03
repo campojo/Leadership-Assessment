@@ -4,7 +4,7 @@ import random
 import requests
 import json
 import matplotlib
-matplotlib.use('Agg')  # Prevents rendering issues on servers
+matplotlib.use('Agg')  # Prevents GUI rendering issues on Render
 import matplotlib.pyplot as plt
 from io import BytesIO
 import os
@@ -65,86 +65,67 @@ def instructions():
     name = request.args.get('name')
     identifier = request.args.get('identifier')
 
-    instructions_text = """
-    This leadership assessment is designed to help you understand your natural leadership style. 
-    - Be honest with your responses.
-    - Don't overthink, but don't rush.
-    - Choose a quiet environment to focus.
-    - Complete the assessment in one sitting.
-    - There is no perfect leader—just insights into your style.
-
-    Once ready, click "Start Assessment".
-    """
-
-    return render_template('instructions.html', name=name, identifier=identifier, instructions=instructions_text)
+    return render_template('instructions.html', name=name, identifier=identifier)
 
 @app.route('/assessment', methods=['GET', 'POST'])
 def assessment():
     """Displays assessment questions and records user responses."""
-    try:
-        if request.method == 'POST':
-            responses = {key: int(value) for key, value in request.form.items() if key.startswith('q_')}
-            return redirect(url_for('results', responses=json.dumps(responses)))  # Convert to JSON string
+    if request.method == 'POST':
+        responses = {key: int(value) for key, value in request.form.items() if key.startswith('q_')}
+        return redirect(url_for('results', responses=json.dumps(responses)))  # Convert to JSON string
 
-        question_dict = load_questions()
-        if not question_dict:
-            return "Error: Questions failed to load from the GitHub Excel file."
+    question_dict = load_questions()
+    if not question_dict:
+        return "Error: Questions failed to load from the GitHub Excel file."
 
-        questions = []
-        for (style_num, style_name), q_list in question_dict.items():
-            for q in q_list:
-                questions.append((style_num, style_name, q['Questions'], q['Approach']))
+    questions = []
+    for (style_num, style_name), q_list in question_dict.items():
+        for q in q_list:
+            questions.append((style_num, style_name, q['Questions'], q['Approach']))
 
-        if not questions:
-            return "Error: No questions found. Check the Excel file structure."
+    random.shuffle(questions)
+    return render_template('assessment.html', questions=questions)
 
-        random.shuffle(questions)
-        return render_template('assessment.html', questions=questions)
-
-    except Exception as e:
-        return f"An unexpected error occurred: {str(e)}"
-
-@app.route('/results', methods=['GET', 'POST'])
+@app.route('/results')
 def results():
     """Calculates and displays leadership assessment results, grouped by style."""
     try:
-        if request.method == 'POST':
-            responses = {key: int(value) for key, value in request.form.items() if key.startswith('q_')}
-        else:
-            responses_str = request.args.get('responses')
-            if not responses_str:
-                return "Error: No responses received."
+        responses_str = request.args.get('responses')
+        if not responses_str:
+            return "Error: No responses received."
 
-            # Convert JSON string back into a dictionary
-            responses = json.loads(responses_str.replace("'", "\""))  # Fix single-quoted JSON issue
+        responses = json.loads(responses_str.replace("'", "\""))  # Convert JSON string to dictionary
 
         weight_mapping = {1: -2.0, 2: -1.0, 3: 0.0, 4: 1.0, 5: 2.0}
         score_summary = {}
 
         for key, score in responses.items():
             parts = key.split('_')
-            if len(parts) < 3:
-                continue  # Skip if data is malformed
+            if len(parts) < 2:
+                continue
             
-            style_name = parts[2]  # Extract style name
-            adjusted_score = weight_mapping.get(int(score), 0)  # Apply weighting
+            style_name = parts[1]  # Extract style name
+            adjusted_score = weight_mapping.get(int(score), 0)  
 
             if style_name not in score_summary:
                 score_summary[style_name] = 0
-            score_summary[style_name] += adjusted_score  # Sum scores per style
+            score_summary[style_name] += adjusted_score  
 
-        # Create Bar Chart
+        sorted_styles = sorted(score_summary.keys())
+        sorted_scores = [score_summary[style] for style in sorted_styles]
+
         if not os.path.exists("static"):
-            os.makedirs("static")  # Ensure static folder exists
+            os.makedirs("static")
 
         chart_path = "static/results_chart.png"
 
         plt.figure(figsize=(10, 6))
-        plt.bar(score_summary.keys(), score_summary.values(), color='blue')
+        plt.bar(sorted_styles, sorted_scores, color='blue')
         plt.xlabel("Leadership Style")
         plt.ylabel("Score")
         plt.title("Leadership Style Assessment Results")
-        plt.xticks(rotation=45)
+        plt.xticks(rotation=45, ha="right")
+        plt.tight_layout()
         plt.savefig(chart_path)
         plt.close()
 
