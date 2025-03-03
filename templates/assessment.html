@@ -7,28 +7,12 @@
 </head>
 <body>
     <h1>Leadership Assessment</h1>
-    <form action="{{ url_for('assessment') }}" method="POST">
-        {% for idx in range(questions|length) %}
-    {% set style_num, style_name, question, approach = questions[idx] %}
-    <p><strong>{{ idx + 1 }}. [{{ style_name }}]</strong> {{ question }}</p>
-    <label>
-        <input type="radio" name="q_{{ idx }}" value="1" required> 1 - Strongly Disagree
-    </label>
-    <label>
-        <input type="radio" name="q_{{ idx }}" value="2"> 2 - Disagree
-    </label>
-    <label>
-        <input type="radio" name="q_{{ idx }}" value="3"> 3 - Neutral
-    </label>
-    <label>
-        <input type="radio" name="q_{{ idx }}" value="4"> 4 - Agree
-    </label>
-    <label>
-        <input type="radio" name="q_{{ idx }}" value="5"> 5 - Strongly Agree
-    </label>
-    <br><br>
-{% endfor %}
+    <p>Please rate the following statements on a scale of 1 to 5:</p>
+    <p><strong>1 = Strongly Disagree | 2 = Disagree | 3 = Neutral | 4 = Agree | 5 = Strongly Agree</strong></p>
 
+    <form method="POST" action="{{ url_for('assessment') }}">
+        {% for idx in range(questions|length) %}
+            {% set style_num, style_name, question, approach = questions[idx] %}
             <p><strong>{{ idx + 1 }}. [{{ style_name }}]</strong> {{ question }}</p>
             <label>
                 <input type="radio" name="q_{{ idx }}" value="1" required> 1 - Strongly Disagree
@@ -47,7 +31,9 @@
             </label>
             <br><br>
         {% endfor %}
-        <button type="submit">Submit Assessment</button>
+        
+        <button type="submit">Submit</button>
     </form>
 </body>
 </html>
+
