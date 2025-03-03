@@ -74,21 +74,30 @@ def instructions():
 @app.route('/assessment', methods=['GET', 'POST'])
 def assessment():
     """Displays assessment questions and records user responses."""
-    if request.method == 'POST':
-        responses = {key: int(value) for key, value in request.form.items() if key.startswith('q_')}
-        return redirect(url_for('results', responses=responses))
+    try:
+        if request.method == 'POST':
+            responses = {key: int(value) for key, value in request.form.items() if key.startswith('q_')}
+            return redirect(url_for('results', responses=responses))
 
-    question_dict = load_questions()
-    if not question_dict:
-        return "Error loading questions. Please try again later."
+        question_dict = load_questions()
 
-    questions = []
-    for (style_num, style_name), q_list in question_dict.items():
-        for q in q_list:
-            questions.append((style_num, style_name, q['Questions'], q['Approach']))
-    
-    random.shuffle(questions)
-    return render_template('assessment.html', questions=questions)
+        if not question_dict:
+            return "Error: Questions failed to load from the GitHub Excel file."
+
+        questions = []
+        for (style_num, style_name), q_list in question_dict.items():
+            for q in q_list:
+                questions.append((style_num, style_name, q['Questions'], q['Approach']))
+
+        if not questions:
+            return "Error: No questions found. Check the Excel file structure."
+
+        random.shuffle(questions)
+        return render_template('assessment.html', questions=questions)
+
+    except Exception as e:
+        return f"Unexpected error: {str(e)}"
+
 
 @app.route('/results')
 def results():
