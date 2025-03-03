@@ -65,7 +65,19 @@ def instructions():
     name = request.args.get('name')
     identifier = request.args.get('identifier')
 
-    return render_template('instructions.html', name=name, identifier=identifier)
+    instructions_text = """
+    This leadership assessment is designed to help you understand your natural leadership style.
+    
+    Please follow these guidelines:
+    - Be honest with your responses.
+    - Don't overthink, but don't rush.
+    - Choose a quiet environment to focus.
+    - Complete the assessment in one sitting.
+    - There is no perfect leader—just insights into your style.
+    """
+
+    return render_template('instructions.html', name=name, identifier=identifier, instructions=instructions_text)
+
 
 @app.route('/assessment', methods=['GET', 'POST'])
 def assessment():
