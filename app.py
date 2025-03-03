@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for
 import pandas as pd
 import random
 import requests
-import matplotlib.pyplot as plt
+import json
 from io import BytesIO
 
 app = Flask(__name__)
@@ -17,11 +17,14 @@ def get_file_path():
         return BytesIO(response.content)
     else:
         print("Error: Unable to download file from GitHub. Please check the URL or try again later.")
-        exit(1)
+        return None
 
 def load_questions():
     """Loads questions from the GitHub Excel file and organizes them by style."""
     file_path = get_file_path()
+    if not file_path:
+        return None
+    
     df = pd.read_excel(file_path)
     df['Approach'] = df['Approach'].str.strip().str.lower()
     
@@ -77,10 +80,9 @@ def assessment():
     try:
         if request.method == 'POST':
             responses = {key: int(value) for key, value in request.form.items() if key.startswith('q_')}
-            return redirect(url_for('results', responses=responses))
+            return redirect(url_for('results', responses=json.dumps(responses)))  # Convert to JSON string
 
         question_dict = load_questions()
-
         if not question_dict:
             return "Error: Questions failed to load from the GitHub Excel file."
 
@@ -96,32 +98,36 @@ def assessment():
         return render_template('assessment.html', questions=questions)
 
     except Exception as e:
-        return f"Unexpected error: {str(e)}"
+        return f"An unexpected error occurred: {str(e)}"
 
-
-@app.route('/results')
+@app.route('/results', methods=['GET', 'POST'])
 def results():
     """Calculates and displays leadership assessment results."""
-    responses = request.args.get('responses')
-    if not responses:
-        return redirect(url_for('index'))
+    try:
+        if request.method == 'POST':
+            responses = {key: int(value) for key, value in request.form.items() if key.startswith('q_')}
+        else:
+            responses_str = request.args.get('responses')
+            if not responses_str:
+                return "Error: No responses received."
 
-    weight_mapping = {1: -2.0, 2: -1.0, 3: 0.0, 4: 1.0, 5: 2.0}
-    score_summary = {}
+            # Convert JSON string back into a dictionary
+            responses = json.loads(responses_str.replace("'", "\""))  # Fix single-quoted JSON issue
 
-    for key, score in responses.items():
-        style_name = key.split('_')[1]  # Extract style name
-        adjusted_score = weight_mapping[int(score)]
-        if style_name not in score_summary:
-            score_summary[style_name] = 0
-        score_summary[style_name] += adjusted_score
+        weight_mapping = {1: -2.0, 2: -1.0, 3: 0.0, 4: 1.0, 5: 2.0}
+        score_summary = {}
 
-    return render_template('results.html', scores=score_summary)
+        for key, score in responses.items():
+            style_name = key.split('_')[1]  # Extract style name
+            adjusted_score = weight_mapping.get(int(score), 0)  # Default to 0 if invalid
+            if style_name not in score_summary:
+                score_summary[style_name] = 0
+            score_summary[style_name] += adjusted_score
+
+        return render_template('results.html', scores=score_summary)
+
+    except Exception as e:
+        return f"An unexpected error occurred: {str(e)}"
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
-
-
