@@ -8,11 +8,18 @@
 <body>
     <h1>Your Leadership Style Assessment Scores</h1>
 
-    <ul>
+    <table border="1">
+        <tr>
+            <th>Leadership Style</th>
+            <th>Score</th>
+        </tr>
         {% for style, score in scores.items() %}
-            <li><strong>{{ style }}:</strong> {{ score }}</li>
+            <tr>
+                <td>{{ style }}</td>
+                <td>{{ score }}</td>
+            </tr>
         {% endfor %}
-    </ul>
+    </table>
 
     <h2>Assessment Summary Chart:</h2>
     <img src="{{ url_for('static', filename='results_chart.png') }}" alt="Results Chart">

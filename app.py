@@ -100,7 +100,7 @@ def assessment():
 
 @app.route('/results')
 def results():
-    """Calculates and displays leadership assessment results, grouped by style."""
+    """Calculates and displays aggregated leadership assessment results, grouped by leadership style."""
     try:
         responses_str = request.args.get('responses')
         if not responses_str:
@@ -108,36 +108,41 @@ def results():
 
         responses = json.loads(responses_str.replace("'", "\""))  # Convert JSON string to dictionary
 
+        # Mapping of responses to weighted scores
         weight_mapping = {1: -2.0, 2: -1.0, 3: 0.0, 4: 1.0, 5: 2.0}
         score_summary = {}
 
+        # Aggregate scores by leadership style
         for key, score in responses.items():
             parts = key.split('_')
-            if len(parts) < 2:
-                continue
+            if len(parts) < 3:
+                continue  # Skip malformed data
             
-            style_name = parts[1]  # Extract style name
-            adjusted_score = weight_mapping.get(int(score), 0)  
+            style_name = parts[1]  # Extract leadership style name
+            adjusted_score = weight_mapping.get(int(score), 0)  # Apply score weighting
 
             if style_name not in score_summary:
                 score_summary[style_name] = 0
-            score_summary[style_name] += adjusted_score  
+            score_summary[style_name] += adjusted_score  # Sum scores per style
 
+        # Sort styles for consistent ordering
         sorted_styles = sorted(score_summary.keys())
         sorted_scores = [score_summary[style] for style in sorted_styles]
 
+        # Ensure the static directory exists
         if not os.path.exists("static"):
             os.makedirs("static")
 
         chart_path = "static/results_chart.png"
 
+        # Create Bar Chart with Proper Labels
         plt.figure(figsize=(10, 6))
-        plt.bar(sorted_styles, sorted_scores, color='blue')
+        plt.bar(sorted_styles, sorted_scores, color='blue')  # Correct x-axis labels
         plt.xlabel("Leadership Style")
-        plt.ylabel("Score")
+        plt.ylabel("Total Score")
         plt.title("Leadership Style Assessment Results")
-        plt.xticks(rotation=45, ha="right")
-        plt.tight_layout()
+        plt.xticks(rotation=45, ha="right")  # Rotate labels for readability
+        plt.tight_layout()  # Ensure labels fit
         plt.savefig(chart_path)
         plt.close()
 
@@ -145,6 +150,7 @@ def results():
 
     except Exception as e:
         return f"An unexpected error occurred: {str(e)}"
+
 
 if __name__ == "__main__":
     app.run(debug=True)
