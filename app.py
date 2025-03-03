@@ -100,7 +100,7 @@ def assessment():
 
 @app.route('/results')
 def results():
-    """Calculates and displays aggregated leadership assessment results, grouped by leadership style."""
+    """Calculates and displays aggregated leadership assessment results, grouped by leadership style name."""
     try:
         responses_str = request.args.get('responses')
         if not responses_str:
@@ -112,22 +112,39 @@ def results():
         weight_mapping = {1: -2.0, 2: -1.0, 3: 0.0, 4: 1.0, 5: 2.0}
         score_summary = {}
 
-        # Aggregate scores by leadership style
+        # Define mapping from Style_Num to Style_Name (can be improved by loading dynamically)
+        style_mapping = {
+            "0": "Transformational",
+            "1": "Transactional",
+            "2": "Servant",
+            "3": "Autocratic",
+            "4": "Laissez-Faire",
+            "5": "Democratic"
+        }
+
+        # Aggregate scores by leadership style name
         for key, score in responses.items():
             parts = key.split('_')
             if len(parts) < 3:
                 continue  # Skip malformed data
             
-            style_name = parts[1]  # Extract leadership style name
+            style_num = parts[1]  # Extract style number (e.g., "0", "1", etc.)
+            style_name = style_mapping.get(style_num, "Unknown Style")  # Get style name
+
             adjusted_score = weight_mapping.get(int(score), 0)  # Apply score weighting
 
             if style_name not in score_summary:
                 score_summary[style_name] = 0
             score_summary[style_name] += adjusted_score  # Sum scores per style
 
-        # Sort styles for consistent ordering
-        sorted_styles = sorted(score_summary.keys())
-        sorted_scores = [score_summary[style] for style in sorted_styles]
+        # Debugging: Print the correct Style Names in logs
+        print("Score Summary with Style Names:", score_summary)
+
+        if not score_summary:
+            return "Error: No scores calculated. Please check response processing."
+
+        sorted_styles = list(score_summary.keys())  # Get leadership style names
+        sorted_scores = [score_summary[style] for style in sorted_styles]  # Get scores
 
         # Ensure the static directory exists
         if not os.path.exists("static"):
@@ -137,7 +154,7 @@ def results():
 
         # Create Bar Chart with Proper Labels
         plt.figure(figsize=(10, 6))
-        plt.bar(sorted_styles, sorted_scores, color='blue')  # Correct x-axis labels
+        plt.bar(sorted_styles, sorted_scores, color='blue')  # Use Style_Name on x-axis
         plt.xlabel("Leadership Style")
         plt.ylabel("Total Score")
         plt.title("Leadership Style Assessment Results")
@@ -150,6 +167,20 @@ def results():
 
     except Exception as e:
         return f"An unexpected error occurred: {str(e)}"
+
+
+@app.route('/test-results')
+def test_results():
+    """Test the results calculation with predefined responses."""
+    test_responses = {
+        "q_0_Transformational": "4",
+        "q_1_Transactional": "2",
+        "q_2_Servant": "5",
+        "q_3_Autocratic": "1",
+        "q_4_LaissezFaire": "3",
+        "q_5_Democratic": "4"
+    }
+    return redirect(url_for('results', responses=json.dumps(test_responses)))
 
 
 if __name__ == "__main__":

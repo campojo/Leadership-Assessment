@@ -8,18 +8,22 @@
 <body>
     <h1>Your Leadership Style Assessment Scores</h1>
 
-    <table border="1">
-        <tr>
-            <th>Leadership Style</th>
-            <th>Score</th>
-        </tr>
-        {% for style, score in scores.items() %}
+    {% if scores %}
+        <table border="1">
             <tr>
-                <td>{{ style }}</td>
-                <td>{{ score }}</td>
+                <th>Leadership Style</th>
+                <th>Score</th>
             </tr>
-        {% endfor %}
-    </table>
+            {% for style, score in scores.items() %}
+                <tr>
+                    <td>{{ style }}</td>
+                    <td>{{ score }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No scores were calculated. Please retake the assessment.</p>
+    {% endif %}
 
     <h2>Assessment Summary Chart:</h2>
     <img src="{{ url_for('static', filename='results_chart.png') }}" alt="Results Chart">
