@@ -3,7 +3,11 @@ import pandas as pd
 import random
 import requests
 import json
+import matplotlib
+matplotlib.use('Agg')  # Prevents rendering issues on servers
+import matplotlib.pyplot as plt
 from io import BytesIO
+import os
 
 app = Flask(__name__)
 
@@ -102,7 +106,7 @@ def assessment():
 
 @app.route('/results', methods=['GET', 'POST'])
 def results():
-    """Calculates and displays leadership assessment results."""
+    """Calculates and displays leadership assessment results, grouped by style."""
     try:
         if request.method == 'POST':
             responses = {key: int(value) for key, value in request.form.items() if key.startswith('q_')}
@@ -118,13 +122,33 @@ def results():
         score_summary = {}
 
         for key, score in responses.items():
-            style_name = key.split('_')[1]  # Extract style name
-            adjusted_score = weight_mapping.get(int(score), 0)  # Default to 0 if invalid
+            parts = key.split('_')
+            if len(parts) < 3:
+                continue  # Skip if data is malformed
+            
+            style_name = parts[2]  # Extract style name
+            adjusted_score = weight_mapping.get(int(score), 0)  # Apply weighting
+
             if style_name not in score_summary:
                 score_summary[style_name] = 0
-            score_summary[style_name] += adjusted_score
+            score_summary[style_name] += adjusted_score  # Sum scores per style
 
-        return render_template('results.html', scores=score_summary)
+        # Create Bar Chart
+        if not os.path.exists("static"):
+            os.makedirs("static")  # Ensure static folder exists
+
+        chart_path = "static/results_chart.png"
+
+        plt.figure(figsize=(10, 6))
+        plt.bar(score_summary.keys(), score_summary.values(), color='blue')
+        plt.xlabel("Leadership Style")
+        plt.ylabel("Score")
+        plt.title("Leadership Style Assessment Results")
+        plt.xticks(rotation=45)
+        plt.savefig(chart_path)
+        plt.close()
+
+        return render_template('results.html', scores=score_summary, chart_path=chart_path)
 
     except Exception as e:
         return f"An unexpected error occurred: {str(e)}"

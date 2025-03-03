@@ -6,15 +6,18 @@
     <title>Assessment Results</title>
 </head>
 <body>
-    <h1>Assessment Results</h1>
-    <p>Here is your leadership style assessment score:</p>
+    <h1>Your Leadership Style Assessment Score:</h1>
 
     <ul>
-        {% for style_name, total_score in scores.items() %}
-            <li><strong>{{ style_name }}</strong>: {{ total_score }}</li>
+        {% for style, score in scores.items() %}
+            <li><strong>{{ style }}:</strong> {{ score }}</li>
         {% endfor %}
     </ul>
 
-    <a href="{{ url_for('index') }}"><button>Take Again</button></a>
+    <h2>Assessment Summary Chart:</h2>
+    <img src="{{ url_for('static', filename='results_chart.png') }}" alt="Results Chart">
+
+    <br><br>
+    <a href="/">Take the Assessment Again</a>
 </body>
 </html>
