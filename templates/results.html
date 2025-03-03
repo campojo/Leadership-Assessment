@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Results</title>
+</head>
+<body>
+    <h1>Assessment Results</h1>
+    <p>Here is your leadership style assessment score:</p>
+
+    <ul>
+        {% for style_name, total_score in scores.items() %}
+            <li><strong>{{ style_name }}</strong>: {{ total_score }}</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('index') }}"><button>Take Again</button></a>
+</body>
+</html>

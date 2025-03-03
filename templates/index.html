@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leadership Assessment</title>
+</head>
+<body>
+    <h1>Welcome to the Leadership Assessment</h1>
+    <p>Please enter your details to begin.</p>
+    
+    <form action="/" method="POST">
+        <label for="name">Your Name:</label>
+        <input type="text" id="name" name="name" required>
+        
+        <br><br>
+
+        <label for="dob">Your Date of Birth (YYYYMMDD):</label>
+        <input type="text" id="dob" name="dob" required pattern="\\d{8}" title="Enter in YYYYMMDD format">
+
+        <br><br>
+
+        <button type="submit">Start Assessment</button>
+    </form>
+</body>
+</html>
