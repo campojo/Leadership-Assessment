@@ -108,11 +108,15 @@ def results():
 
         responses = json.loads(responses_str.replace("'", "\""))  # Convert JSON string to dictionary
 
+        # Debugging: Print the raw responses received
+        print("\n--- DEBUG: Raw Responses Received ---")
+        print(responses)
+
         # Mapping of responses to weighted scores
         weight_mapping = {1: -2.0, 2: -1.0, 3: 0.0, 4: 1.0, 5: 2.0}
         score_summary = {}
 
-        # Define mapping from Style_Num to Style_Name (can be improved by loading dynamically)
+        # Define mapping from Style_Num to Style_Name (Update this based on your dataset)
         style_mapping = {
             "0": "Transformational",
             "1": "Transactional",
@@ -122,23 +126,26 @@ def results():
             "5": "Democratic"
         }
 
-        # Aggregate scores by leadership style name
+        # Process responses
         for key, score in responses.items():
             parts = key.split('_')
+            print(f"Processing key: {key}, split parts: {parts}")  # Debugging output
+
             if len(parts) < 3:
+                print(f"Skipping malformed key: {key}")  # Debugging output
                 continue  # Skip malformed data
             
-            style_num = parts[1]  # Extract style number (e.g., "0", "1", etc.)
-            style_name = style_mapping.get(style_num, "Unknown Style")  # Get style name
-
+            style_num = parts[1]  # Extract Style_Num
+            style_name = style_mapping.get(style_num, "Unknown Style")  # Get Style_Name
             adjusted_score = weight_mapping.get(int(score), 0)  # Apply score weighting
 
             if style_name not in score_summary:
                 score_summary[style_name] = 0
             score_summary[style_name] += adjusted_score  # Sum scores per style
 
-        # Debugging: Print the correct Style Names in logs
-        print("Score Summary with Style Names:", score_summary)
+        # Debugging: Print final score summary
+        print("\n--- DEBUG: Final Score Summary ---")
+        print(score_summary)
 
         if not score_summary:
             return "Error: No scores calculated. Please check response processing."
@@ -167,6 +174,7 @@ def results():
 
     except Exception as e:
         return f"An unexpected error occurred: {str(e)}"
+
 
 
 @app.route('/test-results')
