@@ -15,19 +15,19 @@
             {% set style_num, style_name, question, approach = questions[idx] %}
             <p><strong>{{ idx + 1 }}. [{{ style_name }}]</strong> {{ question }}</p>
             <label>
-                <input type="radio" name="q_{{ idx }}" value="1" required> 1 - Strongly Disagree
+                <input type="radio" name="q_{{ style_num }}_{{ style_name }}" value="1" required> 1 - Strongly Disagree
             </label>
             <label>
-                <input type="radio" name="q_{{ idx }}" value="2"> 2 - Disagree
+                <input type="radio" name="q_{{ style_num }}_{{ style_name }}" value="2"> 2 - Disagree
             </label>
             <label>
-                <input type="radio" name="q_{{ idx }}" value="3"> 3 - Neutral
+                <input type="radio" name="q_{{ style_num }}_{{ style_name }}" value="3"> 3 - Neutral
             </label>
             <label>
-                <input type="radio" name="q_{{ idx }}" value="4"> 4 - Agree
+                <input type="radio" name="q_{{ style_num }}_{{ style_name }}" value="4"> 4 - Agree
             </label>
             <label>
-                <input type="radio" name="q_{{ idx }}" value="5"> 5 - Strongly Agree
+                <input type="radio" name="q_{{ style_num }}_{{ style_name }}" value="5"> 5 - Strongly Agree
             </label>
             <br><br>
         {% endfor %}
@@ -36,4 +36,3 @@
     </form>
 </body>
 </html>
-

@@ -78,7 +78,6 @@ def instructions():
 
     return render_template('instructions.html', name=name, identifier=identifier, instructions=instructions_text)
 
-
 @app.route('/assessment', methods=['GET', 'POST'])
 def assessment():
     """Displays assessment questions and records user responses."""
@@ -116,16 +115,6 @@ def results():
         weight_mapping = {1: -2.0, 2: -1.0, 3: 0.0, 4: 1.0, 5: 2.0}
         score_summary = {}
 
-        # Define mapping from Style_Num to Style_Name (Update this based on your dataset)
-        style_mapping = {
-            "0": "Transformational",
-            "1": "Transactional",
-            "2": "Servant",
-            "3": "Autocratic",
-            "4": "Laissez-Faire",
-            "5": "Democratic"
-        }
-
         # Process responses
         for key, score in responses.items():
             parts = key.split('_')
@@ -136,7 +125,7 @@ def results():
                 continue  # Skip malformed data
             
             style_num = parts[1]  # Extract Style_Num
-            style_name = style_mapping.get(style_num, "Unknown Style")  # Get Style_Name
+            style_name = parts[2]  # Extract Style_Name
             adjusted_score = weight_mapping.get(int(score), 0)  # Apply score weighting
 
             if style_name not in score_summary:
@@ -174,22 +163,6 @@ def results():
 
     except Exception as e:
         return f"An unexpected error occurred: {str(e)}"
-
-
-
-@app.route('/test-results')
-def test_results():
-    """Test the results calculation with predefined responses."""
-    test_responses = {
-        "q_0_Transformational": "4",
-        "q_1_Transactional": "2",
-        "q_2_Servant": "5",
-        "q_3_Autocratic": "1",
-        "q_4_LaissezFaire": "3",
-        "q_5_Democratic": "4"
-    }
-    return redirect(url_for('results', responses=json.dumps(test_responses)))
-
 
 if __name__ == "__main__":
     app.run(debug=True)
