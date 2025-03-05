@@ -120,12 +120,14 @@ def results():
             parts = key.split('_')
             print(f"Processing key: {key}, split parts: {parts}")  # Debugging output
 
-            if len(parts) < 3:
+            if len(parts) < 4:
                 print(f"Skipping malformed key: {key}")  # Debugging output
                 continue  # Skip malformed data
             
-            style_num = parts[1]  # Extract Style_Num
-            style_name = parts[2]  # Extract Style_Name
+            # Extract question index, style_num, and style_name
+            question_idx = parts[1]  # Not used in scoring, but part of the key
+            style_num = parts[2]  # Extract Style_Num
+            style_name = parts[3]  # Extract Style_Name
             adjusted_score = weight_mapping.get(int(score), 0)  # Apply score weighting
 
             if style_name not in score_summary:
