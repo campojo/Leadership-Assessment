@@ -11,7 +11,6 @@ import os
 
 app = Flask(__name__)
 
-# Raw URL to the Excel file with questions
 GITHUB_FILE_URL = "https://raw.githubusercontent.com/campojo/leadership_style_questions/main/Questions%202.0.xlsx"
 
 def get_file_path():
@@ -45,12 +44,7 @@ def load_questions():
 def index():
     if request.method == 'POST':
         name = request.form['name']
-        identifier = request.form['identifier']
-
-        if not identifier.isdigit() or len(identifier) != 8:
-            error = "Please enter an 8-digit number."
-            return render_template('index.html', error=error)
-
+        identifier = request.form['identifier']  # Now optional, no validation
         return redirect(url_for('instructions', name=name, identifier=identifier))
 
     return render_template('index.html', error=None)
@@ -122,7 +116,6 @@ def results():
 
         chart_path = "static/results_chart.png"
 
-        # Chart with labeled Y-axis
         plt.figure(figsize=(10, 6))
         plt.bar(sorted_styles, sorted_scores, color='blue')
         plt.xlabel("Leadership Style")
