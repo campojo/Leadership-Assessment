@@ -10,7 +10,7 @@ app.secret_key = 'your_secret_key_here'
 # Load questions from both sheets
 
 def load_questions():
-    df = pd.read_excel('https://github.com/campojo/leadership_style_questions/raw/main/Questions%202.0%20(4).xlsx', sheet_name=None)
+    df = pd.read_excel('https://github.com/campojo/leadership_style_questions/raw/main/Questions%202.0%20(5).xlsx', sheet_name=None)
     assessment_df = df['Questions']
     survey_df = df['SurveyQuestions']
     return assessment_df['Question'].tolist(), survey_df['Question'].tolist()
