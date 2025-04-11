@@ -6,10 +6,10 @@
     <title>Instructions</title>
 </head>
 <body>
-    <h1>Instructions for Taking the Leadership Assessment</h1>
-    <p>{{ instructions | safe }}</p>
+    <h1>Instructions</h1>
+    <p>{{ instructions }}</p>
 
-    <form action="{{ url_for('assessment') }}" method="GET">
+    <form action="{{ url_for('assessment') }}" method="get">
         <button type="submit">Proceed to Assessment</button>
     </form>
 </body>
