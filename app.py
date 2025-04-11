@@ -121,16 +121,18 @@ def results():
         chart_path = "static/results_chart.png"
 
         plt.figure(figsize=(10, 6))
-        plt.bar(sorted_styles, sorted_scores, color='blue')
+        plt.clf()  # Clear the current figure
+        plt.bar(sorted_styles, sorted_scores, color='blue', zorder=1)
+        plt.ylim(-10, 10)
+        # Make the horizontal line more visible
+        plt.axhline(y=0, color='gray', linestyle='--', linewidth=2.5, zorder=2)           
         plt.xlabel("Leadership Style")
         plt.ylabel("Tendency Level")
         plt.title("Leadership Style Assessment Results")
-        plt.ylim(-10, 10)
-        plt.yticks(ticks=[-10, 0, 10], labels=["Less Likely", "Neutral", "More Likely"])
+        plt.yticks(ticks=[-10, 0, 10], labels=["Lower Tendency", "Moderate", "Higher Tendency"])
         plt.xticks(rotation=45, ha="right")
         plt.tight_layout()
         plt.savefig(chart_path)
-        plt.close()
 
         return render_template('results.html', scores=score_summary, chart_path=chart_path)
 
