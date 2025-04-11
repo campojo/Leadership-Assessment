@@ -1,145 +1,84 @@
-from flask import Flask, render_template, request, redirect, url_for
 import pandas as pd
-import random
-import requests
-import json
-import matplotlib
-matplotlib.use('Agg')  # Avoid display issues on Render
+from flask import Flask, render_template, request, redirect, url_for, session
 import matplotlib.pyplot as plt
-from io import BytesIO
-import os
-
-
-print("Running updated app.py version")
+import io
+import base64
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key_here'
 
-GITHUB_FILE_URL = "https://raw.githubusercontent.com/campojo/leadership_style_questions/main/Questions%202.0.xlsx"
-
-def get_file_path():
-    response = requests.get(GITHUB_FILE_URL)
-    if response.status_code == 200:
-        return BytesIO(response.content)
-    else:
-        print("Error: Unable to download file from GitHub.")
-        return None
+# Load questions from both sheets
 
 def load_questions():
-    file_path = get_file_path()
-    if not file_path:
-        return None
+    df = pd.read_excel('https://github.com/campojo/leadership_style_questions/raw/main/Questions%202.0%20(3).xlsx', sheet_name=None)
+    assessment_df = df['Questions']
+    survey_df = df['SurveyQuestions']
+    return assessment_df['Question'].tolist(), survey_df['Question'].tolist()
 
-    df = pd.read_excel(file_path)
-    df['Approach'] = df['Approach'].str.strip().str.lower()
+assessment_questions, survey_questions = load_questions()
 
-    styles = df[['Style_Num', 'Style_Name']].drop_duplicates()
-    question_dict = {}
-
-    for _, row in styles.iterrows():
-        style_num = row['Style_Num']
-        style_name = row['Style_Name']
-        questions = df[df['Style_Num'] == style_num][['Questions', 'Approach']].to_dict(orient='records')
-        question_dict[(style_num, style_name)] = random.sample(questions, min(5, len(questions)))
-
-    return question_dict
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
-    if request.method == 'POST':
-        name = request.form.get('name', '')
-        identifier = request.form.get('identifier', '')  # Accept anything or blank
-        return redirect(url_for('instructions', name=name, identifier=identifier))
+    return render_template('index.html')
 
-    return render_template('index.html', error=None)
-
-
-@app.route('/instructions')
+@app.route('/instructions', methods=['GET', 'POST'])
 def instructions():
-    name = request.args.get('name')
-    identifier = request.args.get('identifier')
-
-    instructions_text = """
-    This leadership assessment is designed to help you understand your natural leadership style.
-
-    Please follow these guidelines:
-    - Be honest with your responses.
-    - Don't overthink, but don't rush.
-    - Choose a quiet environment to focus.
-    - Complete the assessment in one sitting.
-    - There is no perfect leader—just insights into your style.
-    """
-
-    return render_template('instructions.html', name=name, identifier=identifier, instructions=instructions_text)
+    if request.method == 'POST':
+        session['email'] = request.form.get('email')
+        return redirect(url_for('assessment'))
+    return render_template('instructions.html')
 
 @app.route('/assessment', methods=['GET', 'POST'])
 def assessment():
     if request.method == 'POST':
-        responses = {key: int(value) for key, value in request.form.items() if key.startswith('q_')}
-        return redirect(url_for('results', responses=json.dumps(responses)))
-
-    question_dict = load_questions()
-    if not question_dict:
-        return "Error: Questions failed to load."
-
-    questions = []
-    for (style_num, style_name), q_list in question_dict.items():
-        for q in q_list:
-            questions.append((style_num, style_name, q['Questions'], q['Approach']))
-
-    random.shuffle(questions)
-    return render_template('assessment.html', questions=questions)
+        session['responses'] = {q: request.form.get(q) for q in assessment_questions}
+        session['survey'] = {f'survey_{i+1}': request.form.get(f'survey_{i+1}') for i in range(len(survey_questions))}
+        return redirect(url_for('results'))
+    return render_template('assessment.html', assessment_questions=assessment_questions, survey_questions=survey_questions)
 
 @app.route('/results')
 def results():
-    try:
-        responses_str = request.args.get('responses')
-        if not responses_str:
-            return "Error: No responses received."
+    responses = session.get('responses', {})
+    survey = session.get('survey', {})
 
-        responses = json.loads(responses_str.replace("'", '"'))
+    # Leadership styles and basic scoring
+    styles = ['Transformational', 'Democratic', 'Charismatic', 'Authentic',
+              'Laissez-Faire', 'Situational', 'Transactional', 'Servant']
+    value_map = {
+        'Strongly Disagree': -2,
+        'Disagree': -1,
+        'Neutral': 0,
+        'Agree': 1,
+        'Strongly Agree': 2
+    }
 
-        weight_mapping = {1: -2.0, 2: -1.0, 3: 0.0, 4: 1.0, 5: 2.0}
-        score_summary = {}
+    scores = [value_map.get(responses.get(q, ''), 0) for q in assessment_questions]
+    chunk_size = len(assessment_questions) // len(styles)
+    results = {
+        styles[i]: sum(scores[i*chunk_size:(i+1)*chunk_size])
+        for i in range(len(styles))
+    }
 
-        for key, score in responses.items():
-            parts = key.split('_')
-            if len(parts) < 4:
-                continue
-            style_name = parts[3]
-            adjusted_score = weight_mapping.get(int(score), 0)
-            score_summary[style_name] = score_summary.get(style_name, 0) + adjusted_score
+    # Plot with improvements
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.bar(results.keys(), results.values(), color='blue', zorder=1)
+    ax.axhline(y=0, color='gray', linestyle='--', linewidth=2.5, zorder=2)
+    ax.set_title('Leadership Style Assessment Results')
+    ax.set_ylabel('Tendency Level')
+    ax.set_xlabel('Leadership Style')
+    ax.set_xticklabels(results.keys(), rotation=45, ha='right')
+    ax.set_yticks([-6, -3, 0, 3, 6])
+    ax.set_yticklabels(['Less Likely', '', 'Neutral', '', 'More Likely'])
+    ax.set_ylim(-8, 8)
 
-        if not score_summary:
-            return "Error: No scores calculated."
+    buf = io.BytesIO()
+    plt.tight_layout()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    chart_data = base64.b64encode(buf.read()).decode()
+    plt.close()
 
-        sorted_styles = list(score_summary.keys())
-        sorted_scores = [score_summary[style] for style in sorted_styles]
+    return render_template('results.html', chart_data=chart_data)
 
-        if not os.path.exists("static"):
-            os.makedirs("static")
-
-        chart_path = "static/results_chart.png"
-
-        plt.figure(figsize=(10, 6))
-        plt.clf()  # Clear the current figure
-        plt.bar(sorted_styles, sorted_scores, color='blue', zorder=1)
-        plt.ylim(-10, 10)
-        # Make the horizontal line more visible
-        plt.axhline(y=0, color='gray', linestyle='--', linewidth=2.5, zorder=2)           
-        plt.xlabel("Leadership Style")
-        plt.ylabel("Tendency Level")
-        plt.title("Leadership Style Assessment Results")
-        plt.yticks(ticks=[-10, 0, 10], labels=["Lower Tendency", "Moderate", "Higher Tendency"])
-        plt.xticks(rotation=45, ha="right")
-        plt.tight_layout()
-        plt.savefig(chart_path)
-
-        return render_template('results.html', scores=score_summary, chart_path=chart_path)
-
-    except Exception as e:
-        return f"An error occurred: {str(e)}"
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
-
-# Test line to confirm git recognizes changes

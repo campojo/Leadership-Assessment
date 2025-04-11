@@ -2,27 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leadership Assessment</title>
 </head>
 <body>
-    <h1>Leadership Assessment</h1>
-    <p>Please rate the following statements on a scale of 1 to 5:</p>
-    <p><strong>1 = Strongly Disagree | 2 = Disagree | 3 = Neutral | 4 = Agree | 5 = Strongly Agree</strong></p>
-
-    <form method="POST" action="{{ url_for('assessment') }}">
-        {% for idx in range(questions|length) %}
-            {% set style_num, style_name, question, approach = questions[idx] %}
-            <p><strong>{{ idx + 1 }}.</strong> {{ question }}</p>
-            <label><input type="radio" name="q_{{ idx }}_{{ style_num }}_{{ style_name }}" value="1" required> 1</label>
-            <label><input type="radio" name="q_{{ idx }}_{{ style_num }}_{{ style_name }}" value="2"> 2</label>
-            <label><input type="radio" name="q_{{ idx }}_{{ style_num }}_{{ style_name }}" value="3"> 3</label>
-            <label><input type="radio" name="q_{{ idx }}_{{ style_num }}_{{ style_name }}" value="4"> 4</label>
-            <label><input type="radio" name="q_{{ idx }}_{{ style_num }}_{{ style_name }}" value="5"> 5</label>
-            <br><br>
+    <h2>Leadership Assessment</h2>
+    <form method="POST">
+        {% for idx, question in enumerate(assessment_questions) %}
+            <p><strong>Question {{ idx + 1 }}:</strong> {{ question }}</p>
+            <label><input type="radio" name="{{ question }}" value="Strongly Disagree" required> Strongly Disagree</label><br>
+            <label><input type="radio" name="{{ question }}" value="Disagree"> Disagree</label><br>
+            <label><input type="radio" name="{{ question }}" value="Neutral"> Neutral</label><br>
+            <label><input type="radio" name="{{ question }}" value="Agree"> Agree</label><br>
+            <label><input type="radio" name="{{ question }}" value="Strongly Agree"> Strongly Agree</label><br><br>
         {% endfor %}
 
-        <button type="submit">Submit</button>
+        <hr>
+        <h3>Post-Assessment Survey</h3>
+        <p>We’d appreciate your feedback. These questions are optional but help us improve the experience.</p>
+
+        {# Survey questions with custom logic per original specification #}
+        {% for idx, question in enumerate(survey_questions) %}
+            <p><strong>Survey Question {{ idx + 1 }}:</strong> {{ question }}</p>
+
+            {% if idx == 0 %} {# Q1 #}
+                <label><input type="radio" name="survey_1" value="Very clear"> Very clear</label><br>
+                <label><input type="radio" name="survey_1" value="Clear"> Clear</label><br>
+                <label><input type="radio" name="survey_1" value="Neutral"> Neutral</label><br>
+                <label><input type="radio" name="survey_1" value="Unclear"> Unclear</label><br>
+                <label><input type="radio" name="survey_1" value="Very unclear"> Very unclear</label><br>
+            {% elif idx == 1 %} {# Q2 #}
+                <label><input type="radio" name="survey_2" value="Very helpful"> Very helpful</label><br>
+                <label><input type="radio" name="survey_2" value="Helpful"> Helpful</label><br>
+                <label><input type="radio" name="survey_2" value="Neutral"> Neutral</label><br>
+                <label><input type="radio" name="survey_2" value="Unhelpful"> Unhelpful</label><br>
+                <label><input type="radio" name="survey_2" value="Very unhelpful"> Very unhelpful</label><br>
+            {% elif idx == 2 %} {# Q3 #}
+                <label><input type="radio" name="survey_3" value="Yes"> Yes</label><br>
+                <label><input type="radio" name="survey_3" value="No"> No</label><br>
+                <textarea name="survey_3_details" rows="3" cols="60" placeholder="If yes, please specify:"></textarea>
+            {% elif idx == 3 %} {# Q4 #}
+                <label><input type="radio" name="survey_4" value="Too Short"> Too Short</label><br>
+                <label><input type="radio" name="survey_4" value="About Right"> About Right</label><br>
+                <label><input type="radio" name="survey_4" value="Too Long"> Too Long</label><br>
+            {% elif idx == 4 %} {# Q5 #}
+                <label><input type="radio" name="survey_5" value="Very relevant"> Very relevant</label><br>
+                <label><input type="radio" name="survey_5" value="Relevant"> Relevant</label><br>
+                <label><input type="radio" name="survey_5" value="Neutral"> Neutral</label><br>
+                <label><input type="radio" name="survey_5" value="Irrelevant"> Irrelevant</label><br>
+                <label><input type="radio" name="survey_5" value="Very irrelevant"> Very irrelevant</label><br>
+            {% elif idx == 5 %} {# Q6 #}
+                <label><input type="radio" name="survey_6" value="Yes, a lot"> Yes, a lot</label><br>
+                <label><input type="radio" name="survey_6" value="Yes, somewhat"> Yes, somewhat</label><br>
+                <label><input type="radio" name="survey_6" value="Neutral"> Neutral</label><br>
+                <label><input type="radio" name="survey_6" value="No, not really"> No, not really</label><br>
+                <label><input type="radio" name="survey_6" value="No, not at all"> No, not at all</label><br>
+            {% elif idx in [6, 7, 8, 10] %} {# Q7, Q8, Q9, Q11 #}
+                <textarea name="survey_{{ idx + 1 }}" rows="3" cols="60"></textarea>
+            {% elif idx == 9 %} {# Q10 #}
+                <label><input type="radio" name="survey_10" value="Yes"> Yes</label><br>
+                <label><input type="radio" name="survey_10" value="Maybe"> Maybe</label><br>
+                <label><input type="radio" name="survey_10" value="No"> No</label><br>
+            {% endif %}
+
+            <br>
+        {% endfor %}
+
+        <input type="submit" value="Submit">
     </form>
 </body>
 </html>
