@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 import os
 
+
+print("Running updated app.py version")
+
 app = Flask(__name__)
 
 GITHUB_FILE_URL = "https://raw.githubusercontent.com/campojo/leadership_style_questions/main/Questions%202.0.xlsx"
@@ -136,3 +139,5 @@ def results():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+# Test line to confirm git recognizes changes
