@@ -62,13 +62,13 @@ def results():
     # Plot with improvements
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.bar(results.keys(), results.values(), color='blue', zorder=1)
-    ax.axhline(y=0, color='gray', linestyle='--', linewidth=2.5, zorder=2)
+    ax.axhline(y=0, color='gray', linestyle='--', linewidth=1, zorder=2)
     ax.set_title('Leadership Style Assessment Results')
     ax.set_ylabel('Tendency Level')
     ax.set_xlabel('Leadership Style')
     ax.set_xticklabels(results.keys(), rotation=45, ha='right')
-    ax.set_yticks([-6, -3, 0, 3, 6])
-    ax.set_yticklabels(['Less Likely', '', 'Neutral', '', 'More Likely'])
+    ### ax.set_yticks([-6, -3, 0, 3, 6])
+    ax.set_yticklabels(['Lower Tendency', '', 'Moderate', '', 'Higher Tendency'])
     ax.set_ylim(-8, 8)
 
     buf = io.BytesIO()
