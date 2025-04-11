@@ -1,1 +1,37 @@
-<UPDATED results.html content with the table commented out>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Results</title>
+</head>
+<body>
+    <h1>Your Leadership Style Assessment Scores</h1>
+
+    {# Commented out score table #}
+    {#
+    {% if scores %}
+        <table border="1">
+            <tr>
+                <th>Leadership Style</th>
+                <th>Score</th>
+            </tr>
+            {% for style, score in scores.items() %}
+                <tr>
+                    <td>{{ style }}</td>
+                    <td>{{ score }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No scores were calculated. Please retake the assessment.</p>
+    {% endif %}
+    #}
+
+    <h2>Assessment Summary Chart:</h2>
+    <img src="{{ url_for('static', filename='results_chart.png') }}" alt="Results Chart">
+
+    <br><br>
+    <a href="/">Take the Assessment Again</a>
+</body>
+</html>

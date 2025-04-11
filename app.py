@@ -43,11 +43,12 @@ def load_questions():
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        name = request.form['name']
-        identifier = request.form['identifier']  # Now optional, no validation
+        name = request.form.get('name', '')
+        identifier = request.form.get('identifier', '')  # Accept anything or blank
         return redirect(url_for('instructions', name=name, identifier=identifier))
 
     return render_template('index.html', error=None)
+
 
 @app.route('/instructions')
 def instructions():

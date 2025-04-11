@@ -7,24 +7,19 @@
 </head>
 <body>
     <h1>Welcome to the Leadership Assessment</h1>
-    <p>Please enter your details to begin.</p>
-    
-    <form action="/" method="POST">
-        <label for="name">Your Name:</label>
-        <input type="text" id="name" name="name" required>
-        
-        <br><br>
-
-        <label for="identifier">Enter an 8-digit Identifier:</label>
-        <input type="text" id="identifier" name="identifier" pattern="\d{8}" title="Please enter an 8-digit number" required>
-
-        <br><br>
-
-        <button type="submit">Start Assessment</button>
-    </form>
 
     {% if error %}
         <p style="color: red;">{{ error }}</p>
     {% endif %}
+
+    <form method="POST" action="/">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="identifier">Email Address (optional):</label><br>
+        <input type="text" id="identifier" name="identifier"><br><br>
+
+        <input type="submit" value="Start Assessment">
+    </form>
 </body>
 </html>
