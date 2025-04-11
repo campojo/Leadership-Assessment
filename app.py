@@ -28,6 +28,7 @@ def instructions():
         return redirect(url_for('assessment'))
     return render_template('instructions.html')
 
+
 @app.route('/assessment', methods=['GET', 'POST'])
 def assessment():
     if request.method == 'POST':

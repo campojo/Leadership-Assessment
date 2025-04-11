@@ -2,15 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instructions</title>
+    <style>
+        body {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .instructions {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>Instructions</h1>
-    <p>{{ instructions }}</p>
+    <h2>Leadership Assessment Instructions</h2>
+    
+    <div class="instructions">
+        <p>Please read these instructions carefully before proceeding:</p>
+        <ul>
+            <li>This assessment contains multiple questions about leadership scenarios and preferences</li>
+            <li>Answer each question honestly based on your natural tendencies</li>
+            <li>There are no "right" or "wrong" answers</li>
+            <li>Try to complete the assessment in one sitting</li>
+            <li>Don't overthink your responses - go with your initial reaction</li>
+        </ul>
+    </div>
 
-    <form action="{{ url_for('assessment') }}" method="get">
-        <button type="submit">Proceed to Assessment</button>
+    <form method="GET" action="{{ url_for('assessment') }}">
+        <input type="submit" value="Begin Assessment">
     </form>
 </body>
 </html>
