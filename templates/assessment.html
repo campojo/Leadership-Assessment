@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leadership Assessment</title>
+</head>
+<body>
+    <h1>Leadership Assessment</h1>
+    <p>Please rate the following statements on a scale of 1 to 5:</p>
+    <p><strong>1 = Strongly Disagree | 2 = Disagree | 3 = Neutral | 4 = Agree | 5 = Strongly Agree</strong></p>
+
+    <form method="POST" action="{{ url_for('assessment') }}">
+        {% for idx in range(questions|length) %}
+            {% set style_num, style_name, question, approach = questions[idx] %}
+            <p><strong>{{ idx + 1 }}.</strong> {{ question }}</p>
+            <label><input type="radio" name="q_{{ idx }}_{{ style_num }}_{{ style_name }}" value="1" required> 1</label>
+            <label><input type="radio" name="q_{{ idx }}_{{ style_num }}_{{ style_name }}" value="2"> 2</label>
+            <label><input type="radio" name="q_{{ idx }}_{{ style_num }}_{{ style_name }}" value="3"> 3</label>
+            <label><input type="radio" name="q_{{ idx }}_{{ style_num }}_{{ style_name }}" value="4"> 4</label>
+            <label><input type="radio" name="q_{{ idx }}_{{ style_num }}_{{ style_name }}" value="5"> 5</label>
+            <br><br>
+        {% endfor %}
+
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
