@@ -17,15 +17,20 @@ def load_questions():
 
 assessment_questions, survey_questions = load_questions()
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        identifier = request.form.get('identifier')
+        if name:
+            session['name'] = name
+            session['identifier'] = identifier
+            return redirect(url_for('instructions'))
+        return render_template('index.html', error="Please enter your name")
     return render_template('index.html')
 
-@app.route('/instructions', methods=['GET', 'POST'])
+@app.route('/instructions')
 def instructions():
-    if request.method == 'POST':
-        session['email'] = request.form.get('email')
-        return redirect(url_for('assessment'))
     return render_template('instructions.html')
 
 
