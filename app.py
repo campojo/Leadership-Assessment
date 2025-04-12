@@ -36,15 +36,22 @@ def instructions():
 
 @app.route('/assessment', methods=['GET', 'POST'])
 def assessment():
-    if request.method == 'POST':
+    if request.method == 'GET':
+        # Show the assessment form
+        return render_template('assessment.html', assessment_questions=assessment_questions, survey_questions=survey_questions)
+    elif request.method == 'POST':
+        # Process the submitted assessment
+        if not request.form:  # Check if form data exists
+            return redirect(url_for('assessment'))
         session['responses'] = {q: request.form.get(q) for q in assessment_questions}
         session['survey'] = {f'survey_{i+1}': request.form.get(f'survey_{i+1}') for i in range(len(survey_questions))}
         return redirect(url_for('results'))
-    return render_template('assessment.html', assessment_questions=assessment_questions, survey_questions=survey_questions)
 
 @app.route('/results')
 def results():
     responses = session.get('responses', {})
+    if not responses:
+        return redirect(url_for('assessment'))
     survey = session.get('survey', {})
 
     # Leadership styles and basic scoring
@@ -73,7 +80,7 @@ def results():
     ax.set_ylabel('Tendency Level')
     ax.set_xlabel('Leadership Style')
     ax.set_xticklabels(results.keys(), rotation=45, ha='right')
-    ### ax.set_yticks([-6, -3, 0, 3, 6])
+    ax.set_yticks([-6, -3, 0, 3, 6])
     ax.set_yticklabels(['Lower Tendency', '', 'Moderate', '', 'Higher Tendency'])
     ax.set_ylim(-8, 8)
 
