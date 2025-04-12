@@ -53,8 +53,7 @@ def assessment():
             # Add debug print
             print("Loading assessment page with questions:", len(assessment_questions), "survey questions:", len(survey_questions))
             if not assessment_questions or not survey_questions:
-                # Reload questions if they're empty
-                global assessment_questions, survey_questions
+                # Just reload questions without global declaration
                 assessment_questions, survey_questions = load_questions()
             return render_template('assessment.html', 
                                 assessment_questions=assessment_questions, 
