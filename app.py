@@ -8,12 +8,12 @@ import random
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
 
-# Create a config object to store our questions
-class Config:
-    assessment_questions = []
-    survey_questions = []
+# Global variables
+assessment_questions = []
+survey_questions = []
 
 def load_questions():
+    global assessment_questions, survey_questions
     try:
         print("Attempting to load questions from Excel...")
         df = pd.read_excel('https://github.com/campojo/leadership_style_questions/raw/main/Questions%202.0%20(5).xlsx', 
@@ -32,13 +32,14 @@ def load_questions():
         # Shuffle the selected questions
         random.shuffle(selected_questions)
         
-        return selected_questions, survey_df['Question'].tolist()
+        assessment_questions = selected_questions
+        survey_questions = survey_df['Question'].tolist()
     except Exception as e:
         print(f"Error loading questions: {str(e)}")
         return [], []
 
 # Initial load
-assessment_questions, survey_questions = load_questions()
+load_questions()
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -60,11 +61,11 @@ def instructions():
 def assessment():
     try:
         if request.method == 'GET':
+            global assessment_questions, survey_questions
             print("Loading assessment page with questions:", len(assessment_questions), "survey questions:", len(survey_questions))
             if not assessment_questions or not survey_questions:
                 # Reload questions if they're empty
-                global assessment_questions, survey_questions
-                assessment_questions, survey_questions = load_questions()
+                load_questions()
             return render_template('assessment.html', 
                                 assessment_questions=assessment_questions, 
                                 survey_questions=survey_questions)
