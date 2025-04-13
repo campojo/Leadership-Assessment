@@ -4,32 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assessment Results</title>
+    <style>
+        body {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        .results-container {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>Your Leadership Style Assessment Scores</h1>
+    <h1>Your Leadership Style Assessment Results</h1>
 
-    {# Commented out score table #}
-    {#
-    {% if scores %}
-        <table border="1">
-            <tr>
-                <th>Leadership Style</th>
-                <th>Score</th>
-            </tr>
-            {% for style, score in scores.items() %}
-                <tr>
-                    <td>{{ style }}</td>
-                    <td>{{ score }}</td>
-                </tr>
-            {% endfor %}
-        </table>
-    {% else %}
-        <p>No scores were calculated. Please retake the assessment.</p>
-    {% endif %}
-    #}
-
-    <h2>Assessment Summary Chart:</h2>
-    <img src="{{ url_for('static', filename='results_chart.png') }}" alt="Results Chart">
+    <div class="results-container">
+        <h2>Assessment Summary Chart:</h2>
+        <img src="data:image/png;base64,{{ chart_data }}" alt="Results Chart">
+    </div>
 
     <br><br>
     <a href="/">Take the Assessment Again</a>

@@ -37,14 +37,15 @@
 <body>
     <h2>Leadership Assessment</h2>
     <form method="POST">
+        <!-- Assessment Questions (40 questions, 1-5 scale) -->
         {% for question in assessment_questions %}
             <div class="question">
                 <p><strong>Question {{ loop.index }}:</strong> {{ question }}</p>
-                <label><input type="radio" name="{{ question }}" value="Strongly Disagree" required> Strongly Disagree</label>
-                <label><input type="radio" name="{{ question }}" value="Disagree"> Disagree</label>
-                <label><input type="radio" name="{{ question }}" value="Neutral"> Neutral</label>
-                <label><input type="radio" name="{{ question }}" value="Agree"> Agree</label>
-                <label><input type="radio" name="{{ question }}" value="Strongly Agree"> Strongly Agree</label>
+                <label><input type="radio" name="{{ question }}" value="1" required> 1 (Disagree)</label>
+                <label><input type="radio" name="{{ question }}" value="2"> 2</label>
+                <label><input type="radio" name="{{ question }}" value="3"> 3</label>
+                <label><input type="radio" name="{{ question }}" value="4"> 4</label>
+                <label><input type="radio" name="{{ question }}" value="5"> 5 (Agree)</label>
             </div>
         {% endfor %}
 
@@ -52,6 +53,7 @@
         <h3>Post-Assessment Survey</h3>
         <p>We'd appreciate your feedback. These questions are optional but help us improve the experience.</p>
 
+        <!-- Survey Questions (keeping original format) -->
         {% for question in survey_questions %}
             <div class="question">
                 <p><strong>Survey Question {{ loop.index }}:</strong> {{ question }}</p>
