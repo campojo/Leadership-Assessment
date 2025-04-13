@@ -16,8 +16,16 @@
             background-color: #f9f9f9;
             border-radius: 5px;
         }
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+            max-width: 300px;
+            margin: 10px 0;
+        }
         label {
-            display: block;
+            display: flex;
+            align-items: center;
             margin: 5px 0;
         }
         input[type="submit"] {
@@ -36,16 +44,18 @@
 </head>
 <body>
     <h2>Leadership Assessment</h2>
-    <form method="POST">
+    <form method="POST" action="{{ url_for('assessment') }}">
         <!-- Assessment Questions (40 questions, 1-5 scale) -->
         {% for question in assessment_questions %}
             <div class="question">
                 <p><strong>Question {{ loop.index }}:</strong> {{ question }}</p>
-                <label><input type="radio" name="{{ question }}" value="1" required> 1 (Disagree)</label>
-                <label><input type="radio" name="{{ question }}" value="2"> 2</label>
-                <label><input type="radio" name="{{ question }}" value="3"> 3</label>
-                <label><input type="radio" name="{{ question }}" value="4"> 4</label>
-                <label><input type="radio" name="{{ question }}" value="5"> 5 (Agree)</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="{{ question }}" value="1" required> 1</label>
+                    <label><input type="radio" name="{{ question }}" value="2"> 2</label>
+                    <label><input type="radio" name="{{ question }}" value="3"> 3</label>
+                    <label><input type="radio" name="{{ question }}" value="4"> 4</label>
+                    <label><input type="radio" name="{{ question }}" value="5"> 5</label>
+                </div>
             </div>
         {% endfor %}
 
@@ -84,12 +94,15 @@
                     <label><input type="radio" name="survey_5" value="Neutral"> Neutral</label>
                     <label><input type="radio" name="survey_5" value="Irrelevant"> Irrelevant</label>
                     <label><input type="radio" name="survey_5" value="Very irrelevant"> Very irrelevant</label>
-                {% elif loop.index in [6, 7, 8, 10] %}
-                    <textarea name="survey_{{ loop.index }}" rows="3" cols="60"></textarea>
+                {% elif loop.index in [6, 7, 8, 10, 11] %}
+                    <textarea name="survey_{{ loop.index }}" rows="3" cols="60" placeholder="Please provide your response:"></textarea>
                 {% elif loop.index == 9 %}
-                    <label><input type="radio" name="survey_10" value="Yes"> Yes</label>
-                    <label><input type="radio" name="survey_10" value="Maybe"> Maybe</label>
-                    <label><input type="radio" name="survey_10" value="No"> No</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="survey_9" value="Yes"> Yes</label>
+                        <label><input type="radio" name="survey_9" value="Maybe"> Maybe</label>
+                        <label><input type="radio" name="survey_9" value="No"> No</label>
+                    </div>
+                    <textarea name="survey_9_details" rows="3" cols="60" placeholder="Please provide additional comments:"></textarea>
                 {% endif %}
             </div>
         {% endfor %}

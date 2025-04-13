@@ -7,10 +7,26 @@ import random
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['PERMANENT_SESSION_LIFETIME'] = 1800  # 30 minutes
+app.config['SESSION_COOKIE_SECURE'] = False  # Allow non-HTTPS for development
 
 # Global variables
 assessment_questions = []
 survey_questions = []
+
+def get_style_description(style):
+    descriptions = {
+        'Transformational': 'Focuses on inspiring and motivating followers to exceed their own self-interests for the good of the organization. Emphasizes vision, values, and intellectual stimulation.',
+        'Democratic': 'Involves team members in decision-making processes and values their input. Promotes collaboration and shared responsibility.',
+        'Charismatic': 'Relies on personal charm and appeal to inspire followers. Creates strong emotional bonds and enthusiasm for shared goals.',
+        'Authentic': 'Emphasizes transparency, ethical behavior, and consistency between values and actions. Builds trust through genuine relationships.',
+        'Laissez-Faire': 'Provides minimal direct supervision and allows team members significant autonomy in their work. Best suited for highly skilled and self-motivated teams.',
+        'Situational': 'Adapts leadership approach based on the specific context and needs of followers. Flexible and responsive to changing circumstances.',
+        'Transactional': 'Focuses on clear structure, rewards, and consequences. Emphasizes organization, monitoring, and performance metrics.',
+        'Servant': 'Prioritizes the needs of team members and focuses on their growth and well-being. Leads through service and support.'
+    }
+    return descriptions.get(style, '')
 
 def load_questions():
     global assessment_questions, survey_questions
@@ -60,8 +76,8 @@ def instructions():
 @app.route('/assessment', methods=['GET', 'POST'])
 def assessment():
     try:
+        global assessment_questions, survey_questions
         if request.method == 'GET':
-            global assessment_questions, survey_questions
             print("Loading assessment page with questions:", len(assessment_questions), "survey questions:", len(survey_questions))
             if not assessment_questions or not survey_questions:
                 # Reload questions if they're empty
@@ -70,11 +86,42 @@ def assessment():
                                 assessment_questions=assessment_questions, 
                                 survey_questions=survey_questions)
         elif request.method == 'POST':
+            print("\n=== Form Submission ===\nForm data:", dict(request.form))
             if not request.form:
+                print("No form data received")
                 return redirect(url_for('assessment'))
-            session['responses'] = {q: request.form.get(q) for q in assessment_questions}
-            session['survey'] = {f'survey_{i+1}': request.form.get(f'survey_{i+1}') 
-                               for i in range(len(survey_questions))}
+            
+            # Store assessment responses
+            # Clear any existing responses
+            session.pop('responses', None)
+            session.pop('survey', None)
+            
+            # Store new responses
+            responses = {}
+            for question in assessment_questions:
+                value = request.form.get(question)
+                if value:
+                    responses[question] = value
+            
+            session['responses'] = responses
+            # Make sure changes are saved
+            session.modified = True
+            
+            # Store survey responses including text areas
+            survey_responses = {}
+            for i, _ in enumerate(survey_questions, 1):
+                response = request.form.get(f'survey_{i}')
+                if response:
+                    survey_responses[f'survey_{i}'] = response
+                # Get additional text input if it exists
+                details = request.form.get(f'survey_{i}_details')
+                if details:
+                    survey_responses[f'survey_{i}_details'] = details
+            
+            session['survey'] = survey_responses
+            print("\n=== Stored Data ===\nResponses:", session['responses'])
+            print("Survey:", session['survey'])
+            print("\n=== Redirecting to results ===\n")
             return redirect(url_for('results'))
     except Exception as e:
         print(f"Error in assessment route: {str(e)}")
@@ -83,9 +130,14 @@ def assessment():
 @app.route('/results')
 def results():
     try:
+        print("\n=== Results Route ===\nSession data:", dict(session))
         responses = session.get('responses', {})
+        print("\nGot responses:", responses)
         if not responses:
+            print("No responses found, redirecting to assessment")
             return redirect(url_for('assessment'))
+        
+        print("\nProcessing", len(responses), "responses")
         
         survey = session.get('survey', {})
         print(f"Processing results with {len(responses)} responses")
@@ -108,38 +160,64 @@ def results():
         }
 
         # Create a dictionary to map questions to their styles
-        question_style_map = dict(zip(df['Question'], df['Style_Num']))
+        question_style_map = {}
+        for _, row in df.iterrows():
+            question_style_map[row['Question']] = int(row['Style_Num'])
+        
+        print("\nQuestion to style mapping:", question_style_map)
+        print("\nResponses received:", responses)
         
         # Initialize scores for each style
         style_scores = {i+1: [] for i in range(8)}  # 8 leadership styles
         
         # Group scores by style
         for question, response in responses.items():
+            print(f"Processing question: {question} with response: {response}")
             if question in question_style_map:
                 style_num = question_style_map[question]
                 score = value_map.get(response, 0)
                 style_scores[style_num].append(score)
+                print(f"Added score {score} to style {style_num}")
+            else:
+                print(f"Question not found in mapping: {question}")
         
         # Calculate average score for each style
         results = {}
-        for i, style in enumerate(styles, 1):
-            scores = style_scores.get(i, [])
-            if scores:
-                results[style] = sum(scores) / len(scores)  # Average score
-            else:
-                results[style] = 0
+        style_map = {i+1: style for i, style in enumerate(styles)}  # Map style numbers to names
+        
+        for style_num, scores in style_scores.items():
+            style_name = style_map.get(style_num)
+            if style_name and scores:
+                results[style_name] = sum(scores) / len(scores)  # Average score
+            elif style_name:
+                results[style_name] = 0
+        
+        print("\nFinal results:", results)
 
-        # Plot with improvements
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.bar(results.keys(), results.values(), color='blue', zorder=1)
-        ax.axhline(y=0, color='gray', linestyle='--', linewidth=1, zorder=2)
-        ax.set_title('Leadership Style Assessment Results')
-        ax.set_ylabel('Tendency Level')
-        ax.set_xlabel('Leadership Style')
-        ax.set_xticklabels(results.keys(), rotation=45, ha='right')
-        ax.set_yticks([-2, -1, 0, 1, 2])
-        ax.set_yticklabels(['Strong Disagree', 'Disagree', 'Neutral', 'Agree', 'Strong Agree'])
-        ax.set_ylim(-2.5, 2.5)
+        # Create the plot
+        plt.figure(figsize=(12, 6))
+        plt.clf()  # Clear the current figure
+        
+        # Get the data in the right order
+        styles = list(results.keys())
+        scores = [results[style] for style in styles]
+        
+        # Create the bar chart
+        x = range(len(styles))
+        plt.bar(x, scores, align='center', color='skyblue')
+        
+        # Customize the plot
+        plt.title('Leadership Style Assessment Results', pad=20)
+        plt.ylabel('Tendency Level')
+        plt.xticks(x, styles, rotation=45, ha='right')
+        plt.yticks([-2, -1, 0, 1, 2], ['Strong Disagree', 'Disagree', 'Neutral', 'Agree', 'Strong Agree'])
+        plt.grid(True, axis='y', linestyle='--', alpha=0.7)
+        
+        # Add a horizontal line at y=0
+        plt.axhline(y=0, color='gray', linestyle='-', alpha=0.3)
+        
+        # Adjust layout
+        plt.tight_layout()
 
         buf = io.BytesIO()
         plt.tight_layout()
@@ -148,7 +226,25 @@ def results():
         chart_data = base64.b64encode(buf.read()).decode()
         plt.close()
 
-        return render_template('results.html', chart_data=chart_data)
+        # Generate summary based on top leadership styles
+        sorted_styles = sorted(results.items(), key=lambda x: x[1], reverse=True)
+        top_styles = sorted_styles[:2]
+        bottom_styles = sorted_styles[-2:]
+        
+        summary = {
+            'dominant_styles': [{
+                'style': style,
+                'score': score,
+                'description': get_style_description(style)
+            } for style, score in top_styles],
+            'lesser_styles': [{
+                'style': style,
+                'score': score,
+                'description': get_style_description(style)
+            } for style, score in bottom_styles]
+        }
+        
+        return render_template('results.html', chart_data=chart_data, summary=summary)
     except Exception as e:
         print(f"Error in results route: {str(e)}")
         return f"An error occurred: {str(e)}", 500
