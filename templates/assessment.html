@@ -3,68 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <title>Leadership Assessment</title>
+    <style>
+        body {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .question {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        label {
+            display: block;
+            margin: 5px 0;
+        }
+        input[type="submit"] {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        hr {
+            margin: 30px 0;
+        }
+    </style>
 </head>
 <body>
     <h2>Leadership Assessment</h2>
     <form method="POST">
-        {% for idx, question in enumerate(assessment_questions) %}
-            <p><strong>Question {{ idx + 1 }}:</strong> {{ question }}</p>
-            <label><input type="radio" name="{{ question }}" value="Strongly Disagree" required> Strongly Disagree</label><br>
-            <label><input type="radio" name="{{ question }}" value="Disagree"> Disagree</label><br>
-            <label><input type="radio" name="{{ question }}" value="Neutral"> Neutral</label><br>
-            <label><input type="radio" name="{{ question }}" value="Agree"> Agree</label><br>
-            <label><input type="radio" name="{{ question }}" value="Strongly Agree"> Strongly Agree</label><br><br>
+        {% for question in assessment_questions %}
+            <div class="question">
+                <p><strong>Question {{ loop.index }}:</strong> {{ question }}</p>
+                <label><input type="radio" name="{{ question }}" value="Strongly Disagree" required> Strongly Disagree</label>
+                <label><input type="radio" name="{{ question }}" value="Disagree"> Disagree</label>
+                <label><input type="radio" name="{{ question }}" value="Neutral"> Neutral</label>
+                <label><input type="radio" name="{{ question }}" value="Agree"> Agree</label>
+                <label><input type="radio" name="{{ question }}" value="Strongly Agree"> Strongly Agree</label>
+            </div>
         {% endfor %}
 
         <hr>
         <h3>Post-Assessment Survey</h3>
-        <p>We’d appreciate your feedback. These questions are optional but help us improve the experience.</p>
+        <p>We'd appreciate your feedback. These questions are optional but help us improve the experience.</p>
 
-        {# Survey questions with custom logic per original specification #}
-        {% for idx, question in enumerate(survey_questions) %}
-            <p><strong>Survey Question {{ idx + 1 }}:</strong> {{ question }}</p>
+        {% for question in survey_questions %}
+            <div class="question">
+                <p><strong>Survey Question {{ loop.index }}:</strong> {{ question }}</p>
 
-            {% if idx == 0 %} {# Q1 #}
-                <label><input type="radio" name="survey_1" value="Very clear"> Very clear</label><br>
-                <label><input type="radio" name="survey_1" value="Clear"> Clear</label><br>
-                <label><input type="radio" name="survey_1" value="Neutral"> Neutral</label><br>
-                <label><input type="radio" name="survey_1" value="Unclear"> Unclear</label><br>
-                <label><input type="radio" name="survey_1" value="Very unclear"> Very unclear</label><br>
-            {% elif idx == 1 %} {# Q2 #}
-                <label><input type="radio" name="survey_2" value="Very helpful"> Very helpful</label><br>
-                <label><input type="radio" name="survey_2" value="Helpful"> Helpful</label><br>
-                <label><input type="radio" name="survey_2" value="Neutral"> Neutral</label><br>
-                <label><input type="radio" name="survey_2" value="Unhelpful"> Unhelpful</label><br>
-                <label><input type="radio" name="survey_2" value="Very unhelpful"> Very unhelpful</label><br>
-            {% elif idx == 2 %} {# Q3 #}
-                <label><input type="radio" name="survey_3" value="Yes"> Yes</label><br>
-                <label><input type="radio" name="survey_3" value="No"> No</label><br>
-                <textarea name="survey_3_details" rows="3" cols="60" placeholder="If yes, please specify:"></textarea>
-            {% elif idx == 3 %} {# Q4 #}
-                <label><input type="radio" name="survey_4" value="Too Short"> Too Short</label><br>
-                <label><input type="radio" name="survey_4" value="About Right"> About Right</label><br>
-                <label><input type="radio" name="survey_4" value="Too Long"> Too Long</label><br>
-            {% elif idx == 4 %} {# Q5 #}
-                <label><input type="radio" name="survey_5" value="Very relevant"> Very relevant</label><br>
-                <label><input type="radio" name="survey_5" value="Relevant"> Relevant</label><br>
-                <label><input type="radio" name="survey_5" value="Neutral"> Neutral</label><br>
-                <label><input type="radio" name="survey_5" value="Irrelevant"> Irrelevant</label><br>
-                <label><input type="radio" name="survey_5" value="Very irrelevant"> Very irrelevant</label><br>
-            {% elif idx == 5 %} {# Q6 #}
-                <label><input type="radio" name="survey_6" value="Yes, a lot"> Yes, a lot</label><br>
-                <label><input type="radio" name="survey_6" value="Yes, somewhat"> Yes, somewhat</label><br>
-                <label><input type="radio" name="survey_6" value="Neutral"> Neutral</label><br>
-                <label><input type="radio" name="survey_6" value="No, not really"> No, not really</label><br>
-                <label><input type="radio" name="survey_6" value="No, not at all"> No, not at all</label><br>
-            {% elif idx in [6, 7, 8, 10] %} {# Q7, Q8, Q9, Q11 #}
-                <textarea name="survey_{{ idx + 1 }}" rows="3" cols="60"></textarea>
-            {% elif idx == 9 %} {# Q10 #}
-                <label><input type="radio" name="survey_10" value="Yes"> Yes</label><br>
-                <label><input type="radio" name="survey_10" value="Maybe"> Maybe</label><br>
-                <label><input type="radio" name="survey_10" value="No"> No</label><br>
-            {% endif %}
-
-            <br>
+                {% if loop.index == 1 %}
+                    <label><input type="radio" name="survey_1" value="Very clear"> Very clear</label>
+                    <label><input type="radio" name="survey_1" value="Clear"> Clear</label>
+                    <label><input type="radio" name="survey_1" value="Neutral"> Neutral</label>
+                    <label><input type="radio" name="survey_1" value="Unclear"> Unclear</label>
+                    <label><input type="radio" name="survey_1" value="Very unclear"> Very unclear</label>
+                {% elif loop.index == 2 %}
+                    <label><input type="radio" name="survey_2" value="Very helpful"> Very helpful</label>
+                    <label><input type="radio" name="survey_2" value="Helpful"> Helpful</label>
+                    <label><input type="radio" name="survey_2" value="Neutral"> Neutral</label>
+                    <label><input type="radio" name="survey_2" value="Unhelpful"> Unhelpful</label>
+                    <label><input type="radio" name="survey_2" value="Very unhelpful"> Very unhelpful</label>
+                {% elif loop.index == 3 %}
+                    <label><input type="radio" name="survey_3" value="Yes"> Yes</label>
+                    <label><input type="radio" name="survey_3" value="No"> No</label>
+                    <textarea name="survey_3_details" rows="3" cols="60" placeholder="If yes, please specify:"></textarea>
+                {% elif loop.index == 4 %}
+                    <label><input type="radio" name="survey_4" value="Too Short"> Too Short</label>
+                    <label><input type="radio" name="survey_4" value="About Right"> About Right</label>
+                    <label><input type="radio" name="survey_4" value="Too Long"> Too Long</label>
+                {% elif loop.index == 5 %}
+                    <label><input type="radio" name="survey_5" value="Very relevant"> Very relevant</label>
+                    <label><input type="radio" name="survey_5" value="Relevant"> Relevant</label>
+                    <label><input type="radio" name="survey_5" value="Neutral"> Neutral</label>
+                    <label><input type="radio" name="survey_5" value="Irrelevant"> Irrelevant</label>
+                    <label><input type="radio" name="survey_5" value="Very irrelevant"> Very irrelevant</label>
+                {% elif loop.index in [6, 7, 8, 10] %}
+                    <textarea name="survey_{{ loop.index }}" rows="3" cols="60"></textarea>
+                {% elif loop.index == 9 %}
+                    <label><input type="radio" name="survey_10" value="Yes"> Yes</label>
+                    <label><input type="radio" name="survey_10" value="Maybe"> Maybe</label>
+                    <label><input type="radio" name="survey_10" value="No"> No</label>
+                {% endif %}
+            </div>
         {% endfor %}
 
         <input type="submit" value="Submit">
