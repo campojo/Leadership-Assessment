@@ -44,6 +44,15 @@
 </head>
 <body>
     <h2>Leadership Assessment</h2>
+    
+    <div class="scoring-guide">
+        <h3>Scoring Guide</h3>
+        <div class="score-options">
+            <div class="score-option">1 = Disagree</div>
+            <div class="score-option">3 = Neutral</div>
+            <div class="score-option">5 = Agree</div>
+        </div>
+    </div>
     <form method="POST" action="{{ url_for('assessment') }}">
         <!-- Assessment Questions (40 questions, 1-5 scale) -->
         {% for question in assessment_questions %}

@@ -12,24 +12,88 @@
         }
         .instructions {
             background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 5px;
+            padding: 30px;
+            border-radius: 8px;
             margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .instruction-section {
+            margin-bottom: 25px;
+        }
+        .instruction-section h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .intro {
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+        .final-note {
+            font-style: italic;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
         }
     </style>
 </head>
 <body>
-    <h2>Leadership Assessment Instructions</h2>
-    
+    <h1>Instructions for Taking the Leadership Assessment</h1>
     <div class="instructions">
-        <p>Please read these instructions carefully before proceeding:</p>
-        <ul>
-            <li>This assessment contains multiple questions about leadership scenarios and preferences</li>
-            <li>Answer each question honestly based on your natural tendencies</li>
-            <li>There are no "right" or "wrong" answers</li>
-            <li>Try to complete the assessment in one sitting</li>
-            <li>Don't overthink your responses - go with your initial reaction</li>
-        </ul>
+        <p class="intro">This leadership assessment is designed to help you better understand your natural leadership
+        tendencies and preferences. Your honest and thoughtful responses will provide the most
+        accurate and useful results. Please read the following guidelines before you begin:</p>
+
+        <div class="instruction-section">
+            <h3>1. Be Honest</h3>
+            <p>There are no right or wrong answers. The goal is to reflect your authentic self —
+            not who you think you should be. Honest answers will result in the most valuable
+            insights to help you grow as a leader.</p>
+        </div>
+
+        <div class="instruction-section">
+            <h3>2. Don't Overthink, but Don't Rush</h3>
+            <p>Read each question carefully, but avoid spending too much time trying to find a
+            "perfect" answer. Go with the response that feels most natural or describes how
+            you typically behave.</p>
+        </div>
+
+        <div class="instruction-section">
+            <h3>3. Always and Never Are Rare — But Use Them if They Fit</h3>
+            <p>While most situations are not black and white, if you feel that "always" or
+            "never" truly applies to you for a certain question, don't be afraid to select it.</p>
+        </div>
+
+        <div class="instruction-section">
+            <h3>4. Choose a Quiet Environment</h3>
+            <p>For best results, complete the assessment in a quiet, comfortable space with
+            minimal distractions. This will allow you to focus and provide your most accurate
+            responses.</p>
+        </div>
+
+        <div class="instruction-section">
+            <h3>5. Complete the Assessment in One Sitting</h3>
+            <p>Set aside enough time to complete the assessment in one uninterrupted session.
+            This ensures your responses reflect a consistent mindset.</p>
+        </div>
+
+        <div class="instruction-section">
+            <h3>6. Remember: There's No Perfect Leader</h3>
+            <p>This assessment is not a test, and it does not measure success or failure.
+            Different leadership styles are effective in different situations, and
+            understanding your style is the first step to becoming an adaptable, self-aware
+            leader.</p>
+        </div>
+
+        <div class="instruction-section">
+            <h3>7. Provide Feedback to Help Us Improve</h3>
+            <p>After completing the assessment questions, there will be a few additional
+            questions aimed at helping us improve the assessment process. Your feedback is
+            invaluable, and we appreciate your time in completing this section.</p>
+        </div>
+
+        <p class="final-note">Once you're ready, take a deep breath, relax, and begin.</p>
     </div>
 
     <form method="POST" action="{{ url_for('assessment') }}">
