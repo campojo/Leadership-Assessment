@@ -210,7 +210,7 @@ def results():
         plt.title('Leadership Style Assessment Results', pad=20)
         plt.ylabel('Tendency Level')
         plt.xticks(x, styles, rotation=45, ha='right')
-        plt.yticks([-2, -1, 0, 1, 2], ['Strong Disagree', 'Disagree', 'Neutral', 'Agree', 'Strong Agree'])
+        plt.yticks([-2, 0, 2], ['Low Tendency', 'Moderate', 'High Tendency'])
         plt.grid(True, axis='y', linestyle='--', alpha=0.7)
         
         # Add a horizontal line at y=0
