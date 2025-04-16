@@ -32,8 +32,8 @@ def load_questions():
     global assessment_questions, survey_questions
     try:
         print("Attempting to load questions from Excel...")
-        df = pd.read_excel('https://github.com/campojo/leadership_style_questions/raw/main/Questions%202.0%20(5).xlsx', 
-                          sheet_name=None)
+        df = pd.read_excel('https://github.com/campojo/Leadership-Assessment/blob/main/Questions%202.0.xlsx', 
+                          sheet_name=None, engine='openpyxl')
         
         assessment_df = df['Questions']
         survey_df = df['SurveyQuestions']
@@ -143,7 +143,7 @@ def results():
         print(f"Processing results with {len(responses)} responses")
 
         # Load the original questions to get style information
-        df = pd.read_excel('https://github.com/campojo/leadership_style_questions/raw/main/Questions%202.0%20(5).xlsx', 
+        df = pd.read_excel(https://github.com/campojo/Leadership-Assessment/blob/main/Questions%202.0.xlsx, 
                           sheet_name='Questions')
         
         # Leadership styles
