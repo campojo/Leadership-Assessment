@@ -182,39 +182,39 @@ def results():
                 print(f"Added score {score} to style {style_num}")
             else:
                 print(f"Question not found in mapping: {question}")
+        results_dict = {}
+        style_map = {i+1: style for i, style in enumerate(styles)}  # Map style numbers to names
         
-        # Calculate average scores for each style
-        avg_scores = {}
         for style_num, scores in style_scores.items():
-            if scores:  # Only calculate average if there are scores
-                avg_scores[style_num] = sum(scores) / len(scores)
-            else:
-                avg_scores[style_num] = 0
+            style_name = style_map.get(style_num)
+            if style_name and scores:
+                results_dict[style_name] = sum(scores) / len(scores)  # Average score
+            elif style_name:
+                results_dict[style_name] = 0
         
-        print("\nAverage scores:", avg_scores)
+        print("\nFinal results:", results_dict)
+
+        # Create the plot
+        plt.figure(figsize=(12, 6))
+        plt.clf()  # Clear the current figure
+        
+        # Get the data in the right order
+        styles = list(results_dict.keys())
+        scores = [results_dict[style] for style in styles]
         
         # Create the bar chart
-        plt.figure(figsize=(12, 6))
+        x = range(len(styles))
+        plt.bar(x, scores, align='center', color='skyblue')
+        
+        # Customize the plot
+        plt.title('Leadership Style Assessment Results', pad=20)
+        plt.ylabel('Tendency Level')
+        plt.xticks(x, styles, rotation=45, ha='right')
+        plt.yticks([-2, 0, 2], ['Low Tendency', 'Moderate', 'High Tendency'])
         plt.grid(True, axis='y', linestyle='--', alpha=0.7)
         
-        # Create bars
-        bars = plt.bar(styles, [avg_scores[i] for i in range(1, 9)])
-        
-        # Customize the chart
-        plt.axhline(y=0, color='black', linewidth=0.5)
-        plt.title('Your Leadership Style Profile', pad=20)
-        plt.xlabel('Leadership Styles')
-        plt.ylabel('Score (-2 to +2 scale)')
-        
-        # Rotate x-axis labels for better readability
-        plt.xticks(rotation=45, ha='right')
-        
-        # Color code the bars
-        for bar in bars:
-            if bar.get_height() >= 0:
-                bar.set_color('#4CAF50')
-            else:
-                bar.set_color('#f44336')
+        # Add a horizontal line at y=0
+        plt.axhline(y=0, color='gray', linestyle='-', alpha=0.3)
         
         # Adjust layout to prevent label cutoff
         plt.tight_layout()
@@ -227,7 +227,7 @@ def results():
         plt.close()
 
         # Generate summary based on top leadership styles
-        sorted_styles = sorted(results.items(), key=lambda x: x[1], reverse=True)
+        sorted_styles = sorted(results_dict.items(), key=lambda x: x[1], reverse=True)
         top_styles = sorted_styles[:2]
         bottom_styles = sorted_styles[-2:]
         
