@@ -102,11 +102,15 @@
     <div class="results-container">
         <h2>Your Leadership Style Summary</h2>
         
-        {% if summary.high_styles %}
+        <div class="intro-section">
+            <p>{{ summary.intro_text }}</p>
+        </div>
+
+        {% if summary.high_tendency.styles %}
         <div class="tendency-section high-tendency">
-            <h3>Your High Tendency Leadership Styles</h3>
-            <p class="section-intro">These styles come most naturally to you and represent your core leadership strengths:</p>
-            {% for style in summary.high_styles %}
+            <h3>High Tendency Leadership Styles</h3>
+            <p class="section-intro">{{ summary.high_tendency.description }}</p>
+            {% for style in summary.high_tendency.styles %}
             <div class="style-summary">
                 <h4>{{ style.style }}</h4>
                 <p>{{ style.description }}</p>
@@ -115,11 +119,11 @@
         </div>
         {% endif %}
 
-        {% if summary.moderate_styles %}
+        {% if summary.moderate_tendency.styles %}
         <div class="tendency-section moderate-tendency">
-            <h3>Your Moderate Tendency Leadership Styles</h3>
-            <p class="section-intro">These styles are part of your leadership toolkit, with potential for further development:</p>
-            {% for style in summary.moderate_styles %}
+            <h3>Moderate Tendency Leadership Styles</h3>
+            <p class="section-intro">{{ summary.moderate_tendency.description }}</p>
+            {% for style in summary.moderate_tendency.styles %}
             <div class="style-summary">
                 <h4>{{ style.style }}</h4>
                 <p>{{ style.description }}</p>
@@ -128,11 +132,11 @@
         </div>
         {% endif %}
 
-        {% if summary.low_styles %}
+        {% if summary.low_tendency.styles %}
         <div class="tendency-section low-tendency">
-            <h3>Your Low Tendency Leadership Styles</h3>
-            <p class="section-intro">These styles are less prominent in your leadership approach and may represent growth opportunities:</p>
-            {% for style in summary.low_styles %}
+            <h3>Low Tendency Leadership Styles</h3>
+            <p class="section-intro">{{ summary.low_tendency.description }}</p>
+            {% for style in summary.low_tendency.styles %}
             <div class="style-summary">
                 <h4>{{ style.style }}</h4>
                 <p>{{ style.description }}</p>
@@ -140,8 +144,6 @@
             {% endfor %}
         </div>
         {% endif %}
-
-        <p class="summary-note">Remember that effective leadership often requires adapting your style to the situation and your team's needs. Consider developing aspects of different leadership styles to enhance your overall effectiveness.</p>
     </div>
 
     <div class="action-links">
