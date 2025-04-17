@@ -226,25 +226,91 @@ def results():
         chart_data = base64.b64encode(img.getvalue()).decode()
         plt.close()
 
-        # Generate summary based on top leadership styles
-        sorted_styles = sorted(results_dict.items(), key=lambda x: x[1], reverse=True)
-        top_styles = sorted_styles[:2]
-        bottom_styles = sorted_styles[-2:]
-        
-        summary = {
-            'dominant_styles': [{
-                'style': style,
-                'score': score,
-                'description': get_style_description(style)
-            } for style, score in top_styles],
-            'lesser_styles': [{
-                'style': style,
-                'score': score,
-                'description': get_style_description(style)
-            } for style, score in bottom_styles]
+        # --- Tailored summary based on scores ---
+        import pandas as pd
+        response_df = pd.read_excel('Questions 2.0 (5).xlsx', sheet_name='ScoreBasedResponse')
+
+        # Intro paragraph (always shown)
+        intro_paragraph = (
+            "It's important to remember that there is no right or wrong score in this assessment; rather, the "
+            "goal is to develop self-awareness as a leader. Each leadership style has its strengths and "
+            "challenges, and understanding your tendencies allows you to recognize how your approach "
+            "impacts others. By becoming more aware of your natural leadership style, you can adapt and "
+            "refine your methods to better meet the needs of your team and organization. Self-awareness "
+            "empowers you to make conscious decisions about when to lean into certain behaviors and "
+            "when to adjust your approach, ensuring you lead in a way that fosters growth, collaboration, "
+            "and positive outcomes."
+        )
+
+        # Tendency explanation paragraphs
+        tendency_explanations = {
+            'High': (
+                "High Tendency: "
+                "If a person scores high in this assessment area, it suggests that they strongly exhibit behaviors "
+                "aligned with specific leadership styles. For example, a high score in democratic leadership "
+                "indicates a tendency to prioritize collaboration and actively involve team members in decision- "
+                "making. A high score in transformational leadership suggests a natural ability to inspire and "
+                "motivate others toward long-term goals and personal growth. These tendencies reflect an "
+                "individual who is skilled in creating an inclusive and visionary environment, fostering "
+                "engagement and innovation within their team."
+            ),
+            'Moderate': (
+                "Moderate Tendency: "
+                "If a person scores moderately in this assessment area, it indicates that they exhibit a balanced "
+                "approach to the behaviors associated with that leadership trait. They may demonstrate some "
+                "strength in the area, but also show room for improvement. For example, a moderate score in "
+                "decision-making suggests they are capable of making decisions, but may occasionally hesitate "
+                "or seek more input from others. Similarly, a moderate score in communication might indicate "
+                "that they communicate effectively at times, but could benefit from refining their clarity or "
+                "engagement with different audiences. Overall, they are likely adaptable, but may need to "
+                "develop more consistency in their approach to fully leverage their leadership potential."
+            ),
+            'Low': (
+                "Low Tendency: "
+                "If a person scores low in this assessment area, it suggests that they may find certain behaviors "
+                "associated with that leadership trait more challenging. For example, a low score in democratic "
+                "leadership might indicate a preference for making decisions independently, rather than "
+                "involving others in the decision-making process. A low score in servant leadership might suggest "
+                "a tendency to prioritize tasks over the well-being and development of team members. These "
+                "tendencies reflect areas where the individual may benefit from additional development or "
+                "practice to enhance their effectiveness in specific situations."
+            )
         }
-        
+
+        # Determine tendency for each style and fetch the correct paragraph
+        style_summaries = []
+        for style in styles:
+            score = results_dict[style]
+            if score > 4:
+                tendency = 'High'
+            elif score < -3:
+                tendency = 'Low'
+            else:
+                tendency = 'Moderate'
+            # Fetch the matching description from the Excel sheet
+            desc_row = response_df[
+                (response_df['Leadership Style'] == style) &
+                (response_df['Tendency'] == tendency)
+            ]
+            if not desc_row.empty:
+                description = desc_row['Description'].values[0]
+            else:
+                description = f"No description found for {style} ({tendency})"
+            style_summaries.append({
+                'style': style,
+                'tendency': tendency,
+                'description': description
+            })
+
+        # Compose the summary structure for template
+        summary = {
+            'intro_paragraph': intro_paragraph,
+            'tendency_explanations': tendency_explanations,
+            'style_summaries': style_summaries
+        }
+
         return render_template('results.html', chart_data=chart_data, summary=summary)
+
     except Exception as e:
         print(f"Error in results route: {str(e)}")
         return f"An error occurred: {str(e)}", 500

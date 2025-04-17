@@ -101,49 +101,47 @@
 
     <div class="results-container">
         <h2>Your Leadership Style Summary</h2>
-        
+
         <div class="intro-section">
-            <p>{{ summary.intro_text }}</p>
+            <p>{{ summary.intro_paragraph }}</p>
         </div>
 
-        {% if summary.high_styles %}
+        {# High Tendency Section (if any) #}
         <div class="tendency-section high-tendency">
-            <h3>High Tendency Leadership Styles</h3>
-            <p class="section-intro">These styles come most naturally to you and represent your core leadership strengths:</p>
-            {% for style in summary.high_styles %}
+            <h3>High Tendency</h3>
+            <p class="section-intro">{{ summary.tendency_explanations['High'] }}</p>
+            {% for style in summary.style_summaries if style.tendency == 'High' %}
             <div class="style-summary">
                 <h4>{{ style.style }}</h4>
                 <p>{{ style.description }}</p>
             </div>
             {% endfor %}
         </div>
-        {% endif %}
 
-        {% if summary.moderate_styles %}
+        {# Moderate Tendency Section (if any) #}
         <div class="tendency-section moderate-tendency">
-            <h3>Moderate Tendency Leadership Styles</h3>
-            <p class="section-intro">These styles are part of your leadership toolkit, with potential for further development:</p>
-            {% for style in summary.moderate_styles %}
+            <h3>Moderate Tendency</h3>
+            <p class="section-intro">{{ summary.tendency_explanations['Moderate'] }}</p>
+            {% for style in summary.style_summaries if style.tendency == 'Moderate' %}
             <div class="style-summary">
                 <h4>{{ style.style }}</h4>
                 <p>{{ style.description }}</p>
             </div>
             {% endfor %}
         </div>
-        {% endif %}
 
-        {% if summary.low_styles %}
+        {# Low Tendency Section (if any) #}
         <div class="tendency-section low-tendency">
-            <h3>Low Tendency Leadership Styles</h3>
-            <p class="section-intro">These styles are less prominent in your leadership approach and may represent growth opportunities:</p>
-            {% for style in summary.low_styles %}
+            <h3>Low Tendency</h3>
+            <p class="section-intro">{{ summary.tendency_explanations['Low'] }}</p>
+            {% for style in summary.style_summaries if style.tendency == 'Low' %}
             <div class="style-summary">
                 <h4>{{ style.style }}</h4>
                 <p>{{ style.description }}</p>
             </div>
             {% endfor %}
         </div>
-        {% endif %}
+    </div>
     </div>
 
     <div class="action-links">
