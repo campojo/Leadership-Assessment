@@ -225,65 +225,23 @@ def results():
         img.seek(0)
         chart_data = base64.b64encode(img.getvalue()).decode()
         plt.close()
+
+        # Generate summary based on top leadership styles
+        sorted_styles = sorted(results.items(), key=lambda x: x[1], reverse=True)
+        top_styles = sorted_styles[:2]
+        bottom_styles = sorted_styles[-2:]
         
-        # Categorize styles by score
-        high_styles = []
-        moderate_styles = []
-        low_styles = []
-        
-        for i, style in enumerate(styles, 1):
-            score = avg_scores[i]
-            # Get style descriptions from response_df
-            print(f"\nProcessing style: {style}")
-            print(f"Available styles in response_df: {response_df['Leadership Style'].unique()}")
-            style_responses = response_df[response_df['Leadership Style'] == style]
-            print(f"Found {len(style_responses)} responses for style {style}")
-            
-            if score > 4:
-                tendency = 'High'
-            elif score < -3:
-                tendency = 'Low'
-            else:
-                tendency = 'Moderate'
-            
-            print(f"Tendency for style {style}: {tendency}")
-            print(f"Available tendencies: {style_responses['Tendency'].unique()}")
-            matching_responses = style_responses[style_responses['Tendency'] == tendency]
-            print(f"Found {len(matching_responses)} matching responses for tendency {tendency}")
-            
-            if len(matching_responses) == 0:
-                print(f"No matching description found for {style} with {tendency} tendency")
-                style_desc = f"Description not found for {style} with {tendency} tendency"
-            else:
-                style_desc = matching_responses['Description'].iloc[0]
-            style_data = {
+        summary = {
+            'dominant_styles': [{
                 'style': style,
                 'score': score,
-                'description': style_desc
-            }
-            
-            if tendency == 'High':
-                high_styles.append(style_data)
-            elif tendency == 'Low':
-                low_styles.append(style_data)
-            else:
-                moderate_styles.append(style_data)
-        
-        # Prepare the summary data
-        summary = {
-            'intro_text': "It's important to remember that there is no right or wrong score in this assessment; rather, the goal is to develop self-awareness as a leader. Each leadership style has its strengths and challenges, and understanding your tendencies allows you to recognize how your approach impacts others. By becoming more aware of your natural leadership style, you can adapt and refine your methods to better meet the needs of your team and organization. Self-awareness empowers you to make conscious decisions about when to lean into certain behaviors and when to adjust your approach, ensuring you lead in a way that fosters growth, collaboration, and positive outcomes.",
-            'high_tendency': {
-                'description': "If a person scores high in this assessment area, it suggests that they strongly exhibit behaviors aligned with specific leadership styles. For example, a high score in democratic leadership indicates a tendency to prioritize collaboration and actively involve team members in decision-making. A high score in transformational leadership suggests a natural ability to inspire and motivate others toward long-term goals and personal growth. These tendencies reflect an individual who is skilled in creating an inclusive and visionary environment, fostering engagement and innovation within their team.",
-                'styles': high_styles
-            },
-            'moderate_tendency': {
-                'description': "If a person scores moderately in this assessment area, it indicates that they exhibit a balanced approach to the behaviors associated with that leadership trait. They may demonstrate some strength in the area, but also show room for improvement. For example, a moderate score in decision-making suggests they are capable of making decisions, but may occasionally hesitate or seek more input from others. Similarly, a moderate score in communication might indicate that they communicate effectively at times, but could benefit from refining their clarity or engagement with different audiences. Overall, they are likely adaptable, but may need to develop more consistency in their approach to fully leverage their leadership potential.",
-                'styles': moderate_styles
-            },
-            'low_tendency': {
-                'description': "If a person scores low in this assessment area, it suggests that they may find certain behaviors associated with that leadership trait more challenging. For example, a low score in democratic leadership might indicate a preference for making decisions independently, rather than involving others in the decision-making process. A low score in servant leadership might suggest a tendency to prioritize tasks over the well-being and development of team members. These tendencies reflect areas where the individual may benefit from additional development or practice to enhance their effectiveness in specific situations.",
-                'styles': low_styles
-            }
+                'description': get_style_description(style)
+            } for style, score in top_styles],
+            'lesser_styles': [{
+                'style': style,
+                'score': score,
+                'description': get_style_description(style)
+            } for style, score in bottom_styles]
         }
         
         return render_template('results.html', chart_data=chart_data, summary=summary)
