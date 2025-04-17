@@ -280,7 +280,7 @@ def results():
         style_summaries = []
         for style in styles:
             score = results_dict[style]
-            if score > 4:
+            if score > 3:
                 tendency = 'High'
             elif score < -3:
                 tendency = 'Low'
