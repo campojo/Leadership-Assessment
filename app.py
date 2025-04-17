@@ -234,7 +234,10 @@ def results():
         for i, style in enumerate(styles, 1):
             score = avg_scores[i]
             # Get style descriptions from response_df
+            print(f"\nProcessing style: {style}")
+            print(f"Available styles in response_df: {response_df['Leadership Style'].unique()}")
             style_responses = response_df[response_df['Leadership Style'] == style]
+            print(f"Found {len(style_responses)} responses for style {style}")
             
             if score > 4:
                 tendency = 'High'
@@ -243,7 +246,16 @@ def results():
             else:
                 tendency = 'Moderate'
             
-            style_desc = style_responses[style_responses['Tendency'] == tendency]['Description'].iloc[0]
+            print(f"Tendency for style {style}: {tendency}")
+            print(f"Available tendencies: {style_responses['Tendency'].unique()}")
+            matching_responses = style_responses[style_responses['Tendency'] == tendency]
+            print(f"Found {len(matching_responses)} matching responses for tendency {tendency}")
+            
+            if len(matching_responses) == 0:
+                print(f"No matching description found for {style} with {tendency} tendency")
+                style_desc = f"Description not found for {style} with {tendency} tendency"
+            else:
+                style_desc = matching_responses['Description'].iloc[0]
             style_data = {
                 'style': style,
                 'score': score,
