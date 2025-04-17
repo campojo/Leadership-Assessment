@@ -227,7 +227,6 @@ def results():
         plt.close()
 
         # --- Tailored summary based on scores ---
-        import pandas as pd
         response_df = pd.read_excel('Questions 2.0 (5).xlsx', sheet_name='ScoreBasedResponse')
 
         # Intro paragraph (always shown)
