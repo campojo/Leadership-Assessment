@@ -20,7 +20,7 @@ def get_style_description(style):
         'Transformational': 'Focuses on inspiring and motivating followers to exceed their own self-interests for the good of the organization. Emphasizes vision, values, and intellectual stimulation.',
         'Democratic': 'Involves team members in decision-making processes and values their input. Promotes collaboration and shared responsibility.',
         'Charismatic': 'Relies on personal charm and appeal to inspire followers. Creates strong emotional bonds and enthusiasm for shared goals.',
-        'Authentic': 'Emphasizes transparency, ethical behavior, and consistency between values and actions. Builds trust through genuine relationships.',
+        'Autocratic': 'Emphasizes directive control, clear authority, and decision-making centralized in the leader. Prioritizes efficiency and order, often at the expense of team input.',
         'Laissez-Faire': 'Provides minimal direct supervision and allows team members significant autonomy in their work. Best suited for highly skilled and self-motivated teams.',
         'Situational': 'Adapts leadership approach based on the specific context and needs of followers. Flexible and responsive to changing circumstances.',
         'Transactional': 'Focuses on clear structure, rewards, and consequences. Emphasizes organization, monitoring, and performance metrics.',
@@ -149,7 +149,7 @@ def results():
         response_df = excel_data['ScoreBasedResponse']
         
         # Leadership styles
-        styles = ['Transformational', 'Democratic', 'Charismatic', 'Authentic',
+        styles = ['Transformational', 'Democratic', 'Charismatic', 'Autocratic',
                  'Laissez-Faire', 'Situational', 'Transactional', 'Servant']
         
         # Convert 1-5 scale to -2 to +2 scale for visualization
