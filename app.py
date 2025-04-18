@@ -280,12 +280,12 @@ def results():
         style_summaries = []
         for style in styles:
             score = results_dict[style]
-            if score > 5:
+            if 5 <= score <= 10:
                 tendency = 'High'
-            elif score < -5:
-                tendency = 'Low'
-            else:
+            elif 0 <= score <= 4:
                 tendency = 'Moderate'
+            else:
+                tendency = 'Low'
             # Fetch the matching description from the Excel sheet
             desc_row = response_df[
                 (response_df['Leadership Style'] == style) &
