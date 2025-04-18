@@ -188,7 +188,7 @@ def results():
         for style_num, scores in style_scores.items():
             style_name = style_map.get(style_num)
             if style_name and scores:
-                results_dict[style_name] = sum(scores) / len(scores)  # Average score
+                results_dict[style_name] = sum(scores)  # Sum score, not average
             elif style_name:
                 results_dict[style_name] = 0
         
@@ -280,9 +280,9 @@ def results():
         style_summaries = []
         for style in styles:
             score = results_dict[style]
-            if score > 3:
+            if score > 5:
                 tendency = 'High'
-            elif score < -3:
+            elif score < -5:
                 tendency = 'Low'
             else:
                 tendency = 'Moderate'
