@@ -212,7 +212,74 @@ def results():
         print(f"Error in results route: {str(e)}")
         return f"An error occurred: {str(e)}", 500
 
-# Duplicate /assessment and /results routes removed below this line to resolve AssertionError and ensure only one definition exists.
+import functools
+from flask import flash, send_file
+
+# --- Admin authentication helpers ---
+def admin_required(view_func):
+    @functools.wraps(view_func)
+    def wrapped_view(*args, **kwargs):
+        if not session.get('admin_logged_in'):
+            return redirect(url_for('admin_login'))
+        return view_func(*args, **kwargs)
+    return wrapped_view
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    error = None
+    if request.method == 'POST':
+        password = request.form.get('password')
+        admin_pw = os.environ.get('ADMIN_PASSWORD', 'admin123')
+        if password == admin_pw:
+            session['admin_logged_in'] = True
+            return redirect(url_for('admin_results'))
+        else:
+            error = 'Incorrect password.'
+    return render_template('admin_login.html', error=error)
+
+@app.route('/admin/logout', methods=['POST'])
+def admin_logout():
+    session.pop('admin_logged_in', None)
+    return redirect(url_for('admin_login'))
+
+@app.route('/admin/results')
+@admin_required
+def admin_results():
+    error = None
+    with sqlite3.connect(DB_FILE) as conn:
+        conn.row_factory = sqlite3.Row
+        results = conn.execute('SELECT * FROM summary_results ORDER BY email, style').fetchall()
+    return render_template('admin_results.html', results=results, error=error)
+
+@app.route('/admin/details')
+@admin_required
+def admin_details():
+    email = request.args.get('email')
+    if not email:
+        return redirect(url_for('admin_results'))
+    with sqlite3.connect(DB_FILE) as conn:
+        conn.row_factory = sqlite3.Row
+        summary = conn.execute('SELECT * FROM summary_results WHERE email = ? ORDER BY style', (email,)).fetchall()
+        assessment = conn.execute('SELECT * FROM assessment_results WHERE email = ? ORDER BY question', (email,)).fetchall()
+        survey = conn.execute('SELECT * FROM survey_results WHERE email = ? ORDER BY question', (email,)).fetchall()
+    return render_template('admin_details.html', email=email, summary=summary, assessment=assessment, survey=survey)
+
+import csv
+import io
+@app.route('/admin/export')
+@admin_required
+def admin_export():
+    with sqlite3.connect(DB_FILE) as conn:
+        conn.row_factory = sqlite3.Row
+        results = conn.execute('SELECT * FROM summary_results ORDER BY email, style').fetchall()
+    # Write to CSV in memory
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['email', 'style', 'score', 'tendency', 'description'])
+    for row in results:
+        writer.writerow([row['email'], row['style'], row['score'], row['tendency'], row['description']])
+    output.seek(0)
+    return send_file(io.BytesIO(output.read().encode('utf-8')), mimetype='text/csv', as_attachment=True, download_name='all_results.csv')
 
 if __name__ == '__main__':
     app.run(debug=True)

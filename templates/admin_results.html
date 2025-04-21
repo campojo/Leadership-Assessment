@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Results</title>
+    <style>
+        body { max-width: 1000px; margin: 0 auto; padding: 30px; font-family: Arial, sans-serif; }
+        h1 { text-align: center; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 40px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background: #f5f5f5; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .details-link { color: #2196F3; text-decoration: underline; cursor: pointer; }
+        .logout { float: right; margin-top: -40px; }
+        .error { color: red; }
+        .center { text-align: center; }
+        .button { padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .button:hover { background: #388E3C; }
+    </style>
+</head>
+<body>
+    <h1>All Assessment Results</h1>
+    <form method="post" action="/admin/logout" class="logout">
+        <button type="submit" class="button">Logout</button>
+    </form>
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+    <table>
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Style</th>
+                <th>Score</th>
+                <th>Tendency</th>
+                <th>Description</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in results %}
+            <tr>
+                <td>{{ row.email }}</td>
+                <td>{{ row.style }}</td>
+                <td>{{ row.score }}</td>
+                <td>{{ row.tendency }}</td>
+                <td>{{ row.description }}</td>
+                <td><a href="/admin/details?email={{ row.email|urlencode }}" class="details-link">View</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="center">
+        <form method="get" action="/admin/export">
+            <button type="submit" class="button">Export All Results as CSV</button>
+        </form>
+    </div>
+</body>
+</html>
