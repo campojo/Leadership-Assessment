@@ -76,12 +76,18 @@ def assessment():
         session['responses'] = responses
         session['survey'] = survey_responses
         # Save to DB
+        import datetime
         email = session.get('email', '')
+        # Load question->style mapping
+        df = pd.read_excel('https://raw.githubusercontent.com/campojo/Leadership-Assessment/main/Questions%202.0.xlsx', sheet_name='Questions', engine='openpyxl')
+        q_to_style = dict(zip(df['Question'], df['Style']))
+        now = datetime.datetime.now().isoformat(sep=' ', timespec='seconds')
         with sqlite3.connect(DB_FILE) as conn:
             for question, answer in responses.items():
+                style = q_to_style.get(question, '')
                 conn.execute(
-                    'INSERT INTO assessment_results (email, question, answer) VALUES (?, ?, ?)',
-                    (email, question, answer)
+                    'INSERT INTO assessment_results (email, timestamp, style, question, answer) VALUES (?, ?, ?, ?, ?)',
+                    (email, now, style, question, answer)
                 )
             for question, answer in survey_responses.items():
                 conn.execute(
@@ -289,15 +295,15 @@ import io
 def admin_export():
     with sqlite3.connect(DB_FILE) as conn:
         conn.row_factory = sqlite3.Row
-        results = conn.execute('SELECT * FROM summary_results ORDER BY email, style').fetchall()
+        results = conn.execute('SELECT email, timestamp, style, question, answer FROM assessment_results ORDER BY email, timestamp').fetchall()
     # Write to CSV in memory
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(['email', 'style', 'score', 'tendency', 'description'])
+    writer.writerow(['Email', 'Date/TimeStamp', 'Style', 'Question', 'Answer/score Provided'])
     for row in results:
-        writer.writerow([row['email'], row['style'], row['score'], row['tendency'], row['description']])
+        writer.writerow([row['email'], row['timestamp'], row['style'], row['question'], row['answer']])
     output.seek(0)
-    return send_file(io.BytesIO(output.read().encode('utf-8')), mimetype='text/csv', as_attachment=True, download_name='all_results.csv')
+    return send_file(io.BytesIO(output.read().encode('utf-8')), mimetype='text/csv', as_attachment=True, download_name='assessment_answers.csv')
 
 if __name__ == '__main__':
     app.run(debug=True)

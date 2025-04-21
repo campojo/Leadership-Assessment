@@ -46,11 +46,23 @@
         <h2>Assessment Answers</h2>
         <table>
             <thead>
-                <tr><th>Question</th><th>Answer</th></tr>
+                <tr>
+                    <th>Email</th>
+                    <th>Date/TimeStamp</th>
+                    <th>Style</th>
+                    <th>Question</th>
+                    <th>Answer/Score</th>
+                </tr>
             </thead>
             <tbody>
             {% for row in assessment %}
-                <tr><td>{{ row.question }}</td><td>{{ row.answer }}</td></tr>
+                <tr>
+                    <td>{{ row.email }}</td>
+                    <td>{{ row.timestamp }}</td>
+                    <td>{{ row.style }}</td>
+                    <td>{{ row.question }}</td>
+                    <td>{{ row.answer }}</td>
+                </tr>
             {% endfor %}
             </tbody>
         </table>
