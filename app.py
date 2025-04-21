@@ -165,15 +165,33 @@ def results():
             'High': (
                 "High Tendency: "
                 "If a person scores high in this assessment area, it suggests that they strongly exhibit behaviors "
-                "aligned with specific leadership styles. ..."
+                "aligned with specific leadership styles. For example, a high score in democratic leadership "
+                "indicates a tendency to prioritize collaboration and actively involve team members in decision-"
+                "making. A high score in transformational leadership suggests a natural ability to inspire and "
+                "motivate others toward long-term goals and personal growth. These tendencies reflect an "
+                "individual who is skilled in creating an inclusive and visionary environment, fostering "
+                "engagement and innovation within their team."
             ),
             'Moderate': (
                 "Moderate Tendency: "
-                "If a person scores moderately in this assessment area, it indicates that they exhibit a balanced ..."
+                "If a person scores moderately in this assessment area, it indicates that they exhibit a balanced "
+                "approach to the behaviors associated with that leadership trait. They may demonstrate some "
+                "strength in the area, but also show room for improvement. For example, a moderate score in "
+                "decision-making suggests they are capable of making decisions, but may occasionally hesitate "
+                "or seek more input from others. Similarly, a moderate score in communication might indicate "
+                "that they communicate effectively at times, but could benefit from refining their clarity or "
+                "engagement with different audiences. Overall, they are likely adaptable, but may need to "
+                "develop more consistency in their approach to fully leverage their leadership potential."
             ),
             'Low': (
                 "Low Tendency: "
-                "If a person scores low in this assessment area, it suggests that they may find certain behaviors ..."
+                "If a person scores low in this assessment area, it suggests that they may find certain behaviors "
+                "associated with that leadership trait more challenging. For example, a low score in democratic "
+                "leadership might indicate a preference for making decisions independently, rather than "
+                "involving others in the decision-making process. A low score in servant leadership might suggest "
+                "a tendency to prioritize tasks over the well-being and development of team members. These "
+                "tendencies reflect areas where the individual may benefit from additional development or "
+                "practice to enhance their effectiveness in specific situations."
             )
         }
         style_summaries = []
