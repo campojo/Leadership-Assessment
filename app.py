@@ -37,6 +37,12 @@ def load_questions():
 
 assessment_questions, survey_questions = load_questions()
 
+def build_question_style_map():
+    df = pd.read_excel('https://raw.githubusercontent.com/campojo/Leadership-Assessment/main/Questions%202.0.xlsx', sheet_name='Questions', engine='openpyxl')
+    return dict(zip(df['Question'], df['Style']))
+
+question_to_style = build_question_style_map()
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -78,13 +84,10 @@ def assessment():
         # Save to DB
         import datetime
         email = session.get('email', '')
-        # Load question->style mapping
-        df = pd.read_excel('https://raw.githubusercontent.com/campojo/Leadership-Assessment/main/Questions%202.0.xlsx', sheet_name='Questions', engine='openpyxl')
-        q_to_style = dict(zip(df['Question'], df['Style']))
         now = datetime.datetime.now().isoformat(sep=' ', timespec='seconds')
         with sqlite3.connect(DB_FILE) as conn:
             for question, answer in responses.items():
-                style = q_to_style.get(question, '')
+                style = question_to_style.get(question, '')
                 conn.execute(
                     'INSERT INTO assessment_results (email, timestamp, style, question, answer) VALUES (?, ?, ?, ?, ?)',
                     (email, now, style, question, answer)
