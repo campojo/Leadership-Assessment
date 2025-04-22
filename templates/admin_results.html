@@ -31,6 +31,7 @@
         <thead>
             <tr>
                 <th>Email</th>
+                <th>Timestamp</th>
                 <th>Style</th>
                 <th>Score</th>
                 <th>Tendency</th>
@@ -42,6 +43,7 @@
         {% for row in results %}
             <tr>
                 <td>{{ row.email }}</td>
+                <td>{{ row.timestamp }}</td>
                 <td>{{ row.style }}</td>
                 <td>{{ row.score }}</td>
                 <td>{{ row.tendency }}</td>

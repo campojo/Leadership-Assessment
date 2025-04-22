@@ -72,6 +72,8 @@ def instructions():
 
 @app.route('/assessment', methods=['GET', 'POST'])
 def assessment():
+    if 'email' not in session or not session['email']:
+        return redirect(url_for('index'))
     try:
         if request.method == 'GET':
             return render_template('assessment.html', 
@@ -237,11 +239,13 @@ def results():
         }
         # Save all-time summary results to DB
         email = session.get('email', '')
+        import datetime
+        timestamp = datetime.datetime.now().isoformat(sep=' ', timespec='seconds')
         with sqlite3.connect(DB_FILE) as conn:
             for s in style_summaries:
                 conn.execute(
-                    'INSERT INTO summary_results (email, style, score, tendency, description) VALUES (?, ?, ?, ?, ?)',
-                    (email, s['style'], results_dict[s['style']], s['tendency'], s['description'])
+                    'INSERT INTO summary_results (email, timestamp, style, score, tendency, description) VALUES (?, ?, ?, ?, ?, ?)',
+                    (email, timestamp, s['style'], results_dict[s['style']], s['tendency'], s['description'])
                 )
             conn.commit()
         return render_template('results.html', chart_data=chart_data, summary=summary)
@@ -285,7 +289,7 @@ def admin_results():
     error = None
     with sqlite3.connect(DB_FILE) as conn:
         conn.row_factory = sqlite3.Row
-        results = conn.execute('SELECT * FROM summary_results ORDER BY email, style').fetchall()
+        results = conn.execute('SELECT * FROM summary_results ORDER BY timestamp DESC, email, style').fetchall()
     return render_template('admin_results.html', results=results, error=error)
 
 @app.route('/admin/details')
