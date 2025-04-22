@@ -39,7 +39,17 @@ assessment_questions, survey_questions = load_questions()
 
 def build_question_style_map():
     df = pd.read_excel('https://raw.githubusercontent.com/campojo/Leadership-Assessment/main/Questions%202.0.xlsx', sheet_name='Questions', engine='openpyxl')
-    return dict(zip(df['Question'], df['Style']))
+    style_num_to_name = {
+        1: 'Transformational',
+        2: 'Democratic',
+        3: 'Charismatic',
+        4: 'Autocratic',
+        5: 'Laissez-Faire',
+        6: 'Situational',
+        7: 'Transactional',
+        8: 'Servant'
+    }
+    return {q: style_num_to_name.get(s, s) for q, s in zip(df['Question'], df['Style_Num'])}
 
 question_to_style = build_question_style_map()
 
