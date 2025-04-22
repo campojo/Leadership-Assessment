@@ -80,11 +80,20 @@ def assessment():
                                    assessment_questions=assessment_questions, 
                                    survey_questions=survey_questions)
         # POST: Collect responses
+        import logging
         responses = {}
         for question in assessment_questions:
             answer = request.form.get(question)
             if answer is not None:
                 responses[question] = answer
+        # Logging: how many answers received
+        logging.basicConfig(filename='assessment_debug.log', level=logging.INFO)
+        logging.info(f"Assessment submitted: {len(responses)} answers received for email {session.get('email','')}.")
+        if len(responses) != len(assessment_questions):
+            logging.warning(f"Incomplete submission: {len(responses)} of {len(assessment_questions)} answers received for email {session.get('email','')}.")
+        # Only save if all answers present
+        if len(responses) != len(assessment_questions):
+            return render_template('assessment.html', assessment_questions=assessment_questions, survey_questions=survey_questions, error="Please answer all questions before submitting.")
         survey_responses = {}
         for i, question in enumerate(survey_questions):
             key = f'survey_{i}'
@@ -100,10 +109,13 @@ def assessment():
         with sqlite3.connect(DB_FILE) as conn:
             for question, answer in responses.items():
                 style = question_to_style.get(question, '')
-                conn.execute(
-                    'INSERT INTO assessment_results (email, timestamp, style, question, answer) VALUES (?, ?, ?, ?, ?)',
-                    (email, now, style, question, answer)
-                )
+                try:
+                    conn.execute(
+                        'INSERT INTO assessment_results (email, timestamp, style, question, answer) VALUES (?, ?, ?, ?, ?)',
+                        (email, now, style, question, answer)
+                    )
+                except Exception as e:
+                    logging.error(f"DB insert error for {question}: {e}")
             for question, answer in survey_responses.items():
                 conn.execute(
                     'INSERT INTO survey_results (email, question, answer) VALUES (?, ?, ?)',
