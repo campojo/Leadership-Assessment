@@ -319,6 +319,18 @@ def admin_details():
 
 import csv
 import io
+from flask import send_file
+
+# TEMPORARY: Secure route to download DB for backup. Remove after use!
+@app.route('/download-db')
+def download_db():
+    import os
+    # Only allow download in development mode for security
+    if os.environ.get('FLASK_ENV') != 'development':
+        from flask import abort
+        abort(403)
+    return send_file('responses.db', as_attachment=True)
+
 @app.route('/admin/export')
 @admin_required
 def admin_export():
