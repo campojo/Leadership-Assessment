@@ -237,8 +237,8 @@ def results():
             else:
                 tendency = 'Low'
             # Append ' Leadership' to match Excel values
-            excel_style = f"{style} Leadership"
-            desc_row = response_df[(response_df['Leadership Style'] == excel_style) & (response_df['Tendency'] == tendency)]
+            #bexcel_style = f"{style} Leadership"
+            desc_row = response_df[(response_df['Leadership Style'] == style) & (response_df['Tendency'] == tendency)]
             if not desc_row.empty:
                 description = desc_row['Description'].values[0]
             else:
