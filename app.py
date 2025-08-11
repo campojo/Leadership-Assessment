@@ -22,7 +22,7 @@ init_db()
 
 def load_questions():
     import random
-    df = pd.read_excel('https://raw.githubusercontent.com/campojo/Leadership-Assessment/main/Questions%202.0.xlsx', sheet_name=None, engine='openpyxl')
+    df = pd.read_excel('https://raw.githubusercontent.com/campojo/Leadership-Assessment/main/Questions%202.0%20(5).xlsx', sheet_name=None, engine='openpyxl')
     assessment_df = df['Questions']
     survey_df = df['SurveyQuestions']
     # Group questions by style and select 5 random questions from each
