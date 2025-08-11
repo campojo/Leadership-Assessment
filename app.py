@@ -38,7 +38,7 @@ def load_questions():
 assessment_questions, survey_questions = load_questions()
 
 def build_question_style_map():
-    df = pd.read_excel('https://raw.githubusercontent.com/campojo/Leadership-Assessment/main/Questions%202.0.xlsx', sheet_name='Questions', engine='openpyxl')
+    df = pd.read_excel('https://raw.githubusercontent.com/campojo/Leadership-Assessment/main/Questions%202.0%20(5).xlsx', sheet_name='Questions', engine='openpyxl')
     style_num_to_name = {
         1: 'Transformational',
         2: 'Democratic',
@@ -139,7 +139,7 @@ def results():
         if not responses:
             return redirect(url_for('assessment'))
         # Load questions and style mappings
-        excel_data = pd.read_excel('https://raw.githubusercontent.com/campojo/Leadership-Assessment/main/Questions%202.0.xlsx', sheet_name=['Questions', 'ScoreBasedResponse'], engine='openpyxl')
+        excel_data = pd.read_excel('https://raw.githubusercontent.com/campojo/Leadership-Assessment/main/Questions%202.0%20(5).xlsx', sheet_name=['Questions', 'ScoreBasedResponse'], engine='openpyxl')
         df = excel_data['Questions']
         response_df = excel_data['ScoreBasedResponse']
         styles = ['Transformational', 'Democratic', 'Charismatic', 'Autocratic',
