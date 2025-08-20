@@ -77,8 +77,7 @@ def assessment():
     try:
         if request.method == 'GET':
             return render_template('assessment.html', 
-                                   assessment_questions=assessment_questions, 
-                                   survey_questions=survey_questions)
+                                   assessment_questions=assessment_questions)
         # POST: Collect responses
         import logging
         responses = {}
@@ -93,16 +92,10 @@ def assessment():
             logging.warning(f"Incomplete submission: {len(responses)} of {len(assessment_questions)} answers received for email {session.get('email','')}.")
         # Only save if all answers present
         if len(responses) != len(assessment_questions):
-            return render_template('assessment.html', assessment_questions=assessment_questions, survey_questions=survey_questions, error="Please answer all questions before submitting.")
-        survey_responses = {}
-        for i, question in enumerate(survey_questions):
-            key = f'survey_{i}'
-            answer = request.form.get(key)
-            if answer is not None:
-                survey_responses[question] = answer
+            return render_template('assessment.html', assessment_questions=assessment_questions, error="Please answer all questions before submitting.")
+        
         session['responses'] = responses
-        session['survey'] = survey_responses
-        # Save to DB
+        # Save assessment results to DB
         import datetime
         email = session.get('email', '')
         now = datetime.datetime.now().isoformat(sep=' ', timespec='seconds')
@@ -116,26 +109,16 @@ def assessment():
                     )
                 except Exception as e:
                     logging.error(f"DB insert error for {question}: {e}")
-            for question, answer in survey_responses.items():
-                conn.execute(
-                    'INSERT INTO survey_results (email, question, answer) VALUES (?, ?, ?)',
-                    (email, question, answer)
-                )
             conn.commit()
         return redirect(url_for('results'))
     except Exception as e:
         print(f"Error in assessment route: {str(e)}")
         return f"An error occurred: {str(e)}", 500
 
-# All duplicate assessment() definitions removed to resolve AssertionError
-
-# Duplicate /assessment route removed to eliminate AssertionError
-
 @app.route('/results')
 def results():
     try:
         responses = session.get('responses', {})
-        survey = session.get('survey', {})
         if not responses:
             return redirect(url_for('assessment'))
         # Load questions and style mappings
@@ -236,8 +219,6 @@ def results():
                 tendency = 'Moderate'
             else:
                 tendency = 'Low'
-            # Append ' Leadership' to match Excel values
-            #bexcel_style = f"{style} Leadership"
             desc_row = response_df[(response_df['Leadership Style'] == style) & (response_df['Tendency'] == tendency)]
             if not desc_row.empty:
                 description = desc_row['Description'].values[0]
@@ -263,6 +244,42 @@ def results():
         return render_template('results.html', chart_data=chart_data, summary=summary)
     except Exception as e:
         print(f"Error in results route: {str(e)}")
+        return f"An error occurred: {str(e)}", 500
+
+@app.route('/survey', methods=['GET', 'POST'])
+def survey():
+    if 'email' not in session or not session['email']:
+        return redirect(url_for('index'))
+    if 'responses' not in session:
+        return redirect(url_for('assessment'))
+    
+    try:
+        if request.method == 'GET':
+            return render_template('survey.html', survey_questions=survey_questions)
+        
+        # POST: Collect survey responses
+        survey_responses = {}
+        for i, question in enumerate(survey_questions):
+            key = f'survey_{i}'
+            answer = request.form.get(key)
+            if answer is not None:
+                survey_responses[question] = answer
+        
+        # Save survey responses to DB
+        email = session.get('email', '')
+        with sqlite3.connect(DB_FILE) as conn:
+            for question, answer in survey_responses.items():
+                conn.execute(
+                    'INSERT INTO survey_results (email, question, answer) VALUES (?, ?, ?)',
+                    (email, question, answer)
+                )
+            conn.commit()
+        
+        session['survey'] = survey_responses
+        # Redirect back to home page instead of thank you page
+        return redirect(url_for('index'))
+    except Exception as e:
+        print(f"Error in survey route: {str(e)}")
         return f"An error occurred: {str(e)}", 500
 
 import functools
