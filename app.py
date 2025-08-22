@@ -76,8 +76,7 @@ def assessment():
         return redirect(url_for('index'))
     try:
         if request.method == 'GET':
-            return render_template('assessment.html', 
-                                   assessment_questions=assessment_questions)
+            return render_template('assessment.html', assessment_questions=assessment_questions)
         # POST: Collect responses
         import logging
         responses = {}
@@ -253,34 +252,24 @@ def survey():
     if 'responses' not in session:
         return redirect(url_for('assessment'))
     
-    try:
-        if request.method == 'GET':
-            return render_template('survey.html', survey_questions=survey_questions)
-        
-        # POST: Collect survey responses
-        survey_responses = {}
-        for i, question in enumerate(survey_questions):
-            key = f'survey_{i}'
-            answer = request.form.get(key)
-            if answer is not None:
-                survey_responses[question] = answer
-        
-        # Save survey responses to DB
-        email = session.get('email', '')
-        with sqlite3.connect(DB_FILE) as conn:
-            for question, answer in survey_responses.items():
-                conn.execute(
-                    'INSERT INTO survey_results (email, question, answer) VALUES (?, ?, ?)',
-                    (email, question, answer)
-                )
-            conn.commit()
-        
-        session['survey'] = survey_responses
-        # Redirect back to home page instead of thank you page
-        return redirect(url_for('index'))
-    except Exception as e:
-        print(f"Error in survey route: {str(e)}")
-        return f"An error occurred: {str(e)}", 500
+    if request.method == 'GET':
+        return render_template('survey.html', survey_questions=survey_questions)
+    
+    # POST: Save survey responses
+    survey_responses = {}
+    for i, question in enumerate(survey_questions):
+        answer = request.form.get(f'survey_{i}')
+        if answer:
+            survey_responses[question] = answer
+    
+    # Save to database
+    email = session.get('email', '')
+    with sqlite3.connect(DB_FILE) as conn:
+        for question, answer in survey_responses.items():
+            conn.execute('INSERT INTO survey_results (email, question, answer) VALUES (?, ?, ?)', (email, question, answer))
+        conn.commit()
+    
+    return redirect(url_for('index'))
 
 import functools
 from flask import flash, send_file
