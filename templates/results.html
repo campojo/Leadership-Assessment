@@ -60,15 +60,24 @@
         }
         .button {
             display: inline-block;
-            padding: 10px 20px;
+            padding: 12px 25px;
             background-color: #4CAF50;
             color: white;
             text-decoration: none;
             border-radius: 5px;
             transition: background-color 0.3s;
+            margin: 0 10px;
+            font-size: 16px;
         }
         .button:hover {
             background-color: #45a049;
+        }
+        .button.primary {
+            background-color: #2196F3;
+            font-weight: bold;
+        }
+        .button.primary:hover {
+            background-color: #1976D2;
         }
         .chart-container {
             width: 100%;
@@ -86,6 +95,22 @@
             padding: 20px;
             border-radius: 5px;
             margin: 20px 0;
+        }
+        .next-step {
+            background-color: #e3f2fd;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+            border-left: 5px solid #2196F3;
+        }
+        .next-step h3 {
+            color: #1976D2;
+            margin-top: 0;
+            font-size: 1.3em;
+        }
+        .next-step p {
+            margin-bottom: 0;
+            font-size: 1.1em;
         }
     </style>
 </head>
@@ -142,9 +167,14 @@
             {% endfor %}
         </div>
     </div>
+
+    <div class="next-step">
+        <h3>Help Us Improve This Assessment</h3>
+        <p>Now that you've seen your leadership style results, we'd appreciate your feedback about this assessment experience. Your input helps us make this tool better for future users and ensures we're providing valuable insights.</p>
     </div>
 
     <div class="action-links">
+        <a href="/survey" class="button primary">Continue to Feedback Survey</a>
         <a href="/" class="button">Take the Assessment Again</a>
     </div>
 </body>
