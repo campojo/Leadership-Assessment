@@ -304,11 +304,114 @@ def admin_logout():
 @app.route('/admin/results')
 @admin_required
 def admin_results():
-    error = None
-    with sqlite3.connect(DB_FILE) as conn:
-        conn.row_factory = sqlite3.Row
-        results = conn.execute('SELECT * FROM summary_results ORDER BY timestamp DESC, email, style').fetchall()
-    return render_template('admin_results.html', results=results, error=error)
+    try:
+        with sqlite3.connect(DB_FILE) as conn:
+            conn.row_factory = sqlite3.Row
+            
+            # Get all unique assessment sessions (by email and timestamp)
+            assessment_sessions = conn.execute('''
+                SELECT DISTINCT email, timestamp, MIN(id) as min_id
+                FROM assessment_results 
+                WHERE timestamp IS NOT NULL 
+                GROUP BY email, timestamp 
+                ORDER BY timestamp DESC
+            ''').fetchall()
+            
+            assessments = []
+            value_map = {'1': -2, '2': -1, '3': 0, '4': 1, '5': 2}
+            
+            for session in assessment_sessions:
+                email = session['email']
+                timestamp = session['timestamp']
+                
+                # Get name from session data or use email prefix
+                name = email.split('@')[0].replace('.', ' ').title()
+                
+                # Get all assessment responses for this session
+                question_responses = conn.execute('''
+                    SELECT question, style, answer 
+                    FROM assessment_results 
+                    WHERE email = ? AND timestamp = ?
+                    ORDER BY id
+                ''', (email, timestamp)).fetchall()
+                
+                # Get survey responses for this email (closest to timestamp)
+                survey_responses = conn.execute('''
+                    SELECT question, answer 
+                    FROM survey_results 
+                    WHERE email = ?
+                    ORDER BY id
+                ''', (email,)).fetchall()
+                
+                # Calculate style summary
+                style_scores = {
+                    'Transformational': 0, 'Democratic': 0, 'Charismatic': 0, 'Autocratic': 0,
+                    'Laissez-Faire': 0, 'Situational': 0, 'Transactional': 0, 'Servant': 0
+                }
+                
+                # Process responses and calculate scores
+                processed_responses = []
+                for response in question_responses:
+                    style = response['style'] if response['style'] else 'Unknown'
+                    answer = response['answer']
+                    mapped_score = value_map.get(str(answer), 0)
+                    
+                    if style in style_scores:
+                        style_scores[style] += mapped_score
+                    
+                    processed_responses.append({
+                        'question': response['question'],
+                        'style': style,
+                        'answer': answer,
+                        'mapped_score': mapped_score
+                    })
+                
+                # Create style summary with tendencies
+                style_summary = []
+                for style, score in style_scores.items():
+                    if 5 <= score <= 10:
+                        tendency = 'High'
+                    elif 0 <= score <= 4:
+                        tendency = 'Moderate'
+                    else:
+                        tendency = 'Low'
+                    
+                    style_summary.append({
+                        'style': style,
+                        'score': score,
+                        'tendency': tendency
+                    })
+                
+                # Format timestamp for display
+                try:
+                    from datetime import datetime
+                    dt = datetime.fromisoformat(timestamp.replace(' ', 'T'))
+                    formatted_timestamp = dt.strftime('%m-%d-%Y %I:%M%p')
+                except:
+                    formatted_timestamp = timestamp or 'Unknown'
+                
+                assessments.append({
+                    'name': name,
+                    'email': email,
+                    'timestamp': formatted_timestamp,
+                    'question_responses': processed_responses,
+                    'survey_responses': [{'question': s['question'], 'answer': s['answer']} for s in survey_responses],
+                    'style_summary': style_summary
+                })
+            
+            # Calculate stats
+            total_assessments = len(assessments)
+            total_surveys = len([a for a in assessments if a['survey_responses']])
+            unique_users = len(set(a['email'] for a in assessments))
+            
+            return render_template('admin_results.html', 
+                                 assessments=assessments,
+                                 total_assessments=total_assessments,
+                                 total_surveys=total_surveys,
+                                 unique_users=unique_users)
+                                 
+    except Exception as e:
+        return f"Admin results error: {str(e)}", 500
 
 @app.route('/admin/details')
 @admin_required
@@ -340,17 +443,127 @@ def download_db():
 @app.route('/admin/export')
 @admin_required
 def admin_export():
-    with sqlite3.connect(DB_FILE) as conn:
-        conn.row_factory = sqlite3.Row
-        results = conn.execute('SELECT email, timestamp, style, question, answer FROM assessment_results ORDER BY email, timestamp').fetchall()
-    # Write to CSV in memory
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(['Email', 'Date/TimeStamp', 'Style', 'Question', 'Answer/score Provided'])
-    for row in results:
-        writer.writerow([row['email'], row['timestamp'], row['style'], row['question'], row['answer']])
-    output.seek(0)
-    return send_file(io.BytesIO(output.read().encode('utf-8')), mimetype='text/csv', as_attachment=True, download_name='assessment_answers.csv')
+    try:
+        with sqlite3.connect(DB_FILE) as conn:
+            conn.row_factory = sqlite3.Row
+            
+            # Get all assessment data with comprehensive details
+            assessment_sessions = conn.execute('''
+                SELECT DISTINCT email, timestamp
+                FROM assessment_results 
+                WHERE timestamp IS NOT NULL 
+                ORDER BY timestamp DESC
+            ''').fetchall()
+            
+            # Create comprehensive export data
+            export_data = []
+            value_map = {'1': -2, '2': -1, '3': 0, '4': 1, '5': 2}
+            
+            for session in assessment_sessions:
+                email = session['email']
+                timestamp = session['timestamp']
+                name = email.split('@')[0].replace('.', ' ').title()
+                
+                # Get all responses for this session
+                responses = conn.execute('''
+                    SELECT question, style, answer 
+                    FROM assessment_results 
+                    WHERE email = ? AND timestamp = ?
+                    ORDER BY id
+                ''', (email, timestamp)).fetchall()
+                
+                # Get survey responses
+                survey_responses = conn.execute('''
+                    SELECT question, answer 
+                    FROM survey_results 
+                    WHERE email = ?
+                ''', (email,)).fetchall()
+                
+                # Calculate style scores
+                style_scores = {
+                    'Transformational': 0, 'Democratic': 0, 'Charismatic': 0, 'Autocratic': 0,
+                    'Laissez-Faire': 0, 'Situational': 0, 'Transactional': 0, 'Servant': 0
+                }
+                
+                # Process each question response
+                for i, response in enumerate(responses, 1):
+                    style = response['style'] if response['style'] else 'Unknown'
+                    answer = response['answer']
+                    mapped_score = value_map.get(str(answer), 0)
+                    
+                    if style in style_scores:
+                        style_scores[style] += mapped_score
+                    
+                    # Format timestamp
+                    try:
+                        from datetime import datetime
+                        dt = datetime.fromisoformat(timestamp.replace(' ', 'T'))
+                        formatted_timestamp = dt.strftime('%m-%d-%Y %I:%M%p')
+                    except:
+                        formatted_timestamp = timestamp
+                    
+                    export_data.append({
+                        'Name': name,
+                        'Email': email,
+                        'Assessment_Timestamp': formatted_timestamp,
+                        'Question_Number': i,
+                        'Question_Text': response['question'],
+                        'Leadership_Style': style,
+                        'User_Answer': answer,
+                        'Calculated_Score': mapped_score,
+                        'Transformational_Total': style_scores['Transformational'],
+                        'Democratic_Total': style_scores['Democratic'],
+                        'Charismatic_Total': style_scores['Charismatic'],
+                        'Autocratic_Total': style_scores['Autocratic'],
+                        'Laissez_Faire_Total': style_scores['Laissez-Faire'],
+                        'Situational_Total': style_scores['Situational'],
+                        'Transactional_Total': style_scores['Transactional'],
+                        'Servant_Total': style_scores['Servant'],
+                        'Survey_Completed': 'Yes' if survey_responses else 'No'
+                    })
+                
+                # Add survey data as separate rows
+                for survey in survey_responses:
+                    export_data.append({
+                        'Name': name,
+                        'Email': email,
+                        'Assessment_Timestamp': formatted_timestamp,
+                        'Question_Number': 'SURVEY',
+                        'Question_Text': survey['question'],
+                        'Leadership_Style': 'Survey',
+                        'User_Answer': survey['answer'],
+                        'Calculated_Score': 'N/A',
+                        'Transformational_Total': '',
+                        'Democratic_Total': '',
+                        'Charismatic_Total': '',
+                        'Autocratic_Total': '',
+                        'Laissez_Faire_Total': '',
+                        'Situational_Total': '',
+                        'Transactional_Total': '',
+                        'Servant_Total': '',
+                        'Survey_Completed': 'Yes'
+                    })
+            
+            # Write to CSV
+            output = io.StringIO()
+            if export_data:
+                writer = csv.DictWriter(output, fieldnames=export_data[0].keys())
+                writer.writeheader()
+                writer.writerows(export_data)
+            else:
+                writer = csv.writer(output)
+                writer.writerow(['No data available'])
+            
+            output.seek(0)
+            return send_file(
+                io.BytesIO(output.read().encode('utf-8')), 
+                mimetype='text/csv', 
+                as_attachment=True, 
+                download_name='comprehensive_assessment_data.csv'
+            )
+            
+    except Exception as e:
+        return f"Export error: {str(e)}", 500
 
 if __name__ == '__main__':
     app.run(debug=True)
