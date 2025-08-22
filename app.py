@@ -254,25 +254,9 @@ def survey():
     
     try:
         if request.method == 'GET':
-            if not survey_questions:
-                return f"Error: No survey questions loaded. survey_questions = {survey_questions}"
-            return render_template('survey.html', survey_questions=survey_questions)
+            return f"Survey questions debug: {len(survey_questions)} questions found. First few: {survey_questions[:3] if survey_questions else 'None'}"
         
-        # POST: Save survey responses
-        survey_responses = {}
-        for i, question in enumerate(survey_questions):
-            answer = request.form.get(f'survey_{i}')
-            if answer:
-                survey_responses[question] = answer
-        
-        # Save to database
-        email = session.get('email', '')
-        with sqlite3.connect(DB_FILE) as conn:
-            for question, answer in survey_responses.items():
-                conn.execute('INSERT INTO survey_results (email, question, answer) VALUES (?, ?, ?)', (email, question, answer))
-            conn.commit()
-        
-        return redirect(url_for('index'))
+        return "Survey POST method"
     except Exception as e:
         return f"Survey error: {str(e)}"
 
