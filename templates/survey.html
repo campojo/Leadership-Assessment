@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Feedback Survey</title>
+    <style>
+        body {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        .intro {
+            background-color: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 5px solid #2196F3;
+        }
+        .intro h1 {
+            color: #1976D2;
+            margin-top: 0;
+        }
+        .question {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        .question h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+        input[type="radio"] {
+            margin-right: 8px;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: Arial, sans-serif;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        .submit-section {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+        }
+        input[type="submit"] {
+            padding: 12px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="intro">
+        <h1>Assessment Feedback Survey</h1>
+        <p>Thank you for completing the Leadership Assessment! Now that you've seen your results, we'd appreciate your feedback about the experience.</p>
+        <p><em>All questions are optional, but your input is valuable to us.</em></p>
+    </div>
+
+    <form method="POST" action="/survey">
+        {% for question in survey_questions %}
+            <div class="question">
+                <h3>Question {{ loop.index }}: {{ question }}</h3>
+
+                {% if loop.index == 1 %}
+                    <label><input type="radio" name="survey_0" value="Very clear"> Very clear</label>
+                    <label><input type="radio" name="survey_0" value="Clear"> Clear</label>
+                    <label><input type="radio" name="survey_0" value="Neutral"> Neutral</label>
+                    <label><input type="radio" name="survey_0" value="Unclear"> Unclear</label>
+                    <label><input type="radio" name="survey_0" value="Very unclear"> Very unclear</label>
+                {% elif loop.index == 2 %}
+                    <label><input type="radio" name="survey_1" value="Very helpful"> Very helpful</label>
+                    <label><input type="radio" name="survey_1" value="Helpful"> Helpful</label>
+                    <label><input type="radio" name="survey_1" value="Neutral"> Neutral</label>
+                    <label><input type="radio" name="survey_1" value="Unhelpful"> Unhelpful</label>
+                    <label><input type="radio" name="survey_1" value="Very unhelpful"> Very unhelpful</label>
+                {% elif loop.index == 3 %}
+                    <label><input type="radio" name="survey_2" value="Yes"> Yes</label>
+                    <label><input type="radio" name="survey_2" value="No"> No</label>
+                    <textarea name="survey_2_details" rows="3" placeholder="If yes, please specify:"></textarea>
+                {% elif loop.index == 4 %}
+                    <label><input type="radio" name="survey_3" value="Too Short"> Too Short</label>
+                    <label><input type="radio" name="survey_3" value="About Right"> About Right</label>
+                    <label><input type="radio" name="survey_3" value="Too Long"> Too Long</label>
+                {% elif loop.index == 5 %}
+                    <label><input type="radio" name="survey_4" value="Very relevant"> Very relevant</label>
+                    <label><input type="radio" name="survey_4" value="Relevant"> Relevant</label>
+                    <label><input type="radio" name="survey_4" value="Neutral"> Neutral</label>
+                    <label><input type="radio" name="survey_4" value="Irrelevant"> Irrelevant</label>
+                    <label><input type="radio" name="survey_4" value="Very irrelevant"> Very irrelevant</label>
+                {% else %}
+                    <textarea name="survey_{{ loop.index - 1 }}" rows="4" placeholder="Please provide your response:"></textarea>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <div class="submit-section">
+            <p>Thank you for taking the time to provide feedback!</p>
+            <input type="submit" value="Submit Feedback">
+        </div>
+    </form>
+</body>
+</html>
