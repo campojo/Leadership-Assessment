@@ -252,24 +252,29 @@ def survey():
     if 'responses' not in session:
         return redirect(url_for('assessment'))
     
-    if request.method == 'GET':
-        return render_template('survey.html', survey_questions=survey_questions)
-    
-    # POST: Save survey responses
-    survey_responses = {}
-    for i, question in enumerate(survey_questions):
-        answer = request.form.get(f'survey_{i}')
-        if answer:
-            survey_responses[question] = answer
-    
-    # Save to database
-    email = session.get('email', '')
-    with sqlite3.connect(DB_FILE) as conn:
-        for question, answer in survey_responses.items():
-            conn.execute('INSERT INTO survey_results (email, question, answer) VALUES (?, ?, ?)', (email, question, answer))
-        conn.commit()
-    
-    return redirect(url_for('index'))
+    try:
+        if request.method == 'GET':
+            if not survey_questions:
+                return f"Error: No survey questions loaded. survey_questions = {survey_questions}"
+            return render_template('survey.html', survey_questions=survey_questions)
+        
+        # POST: Save survey responses
+        survey_responses = {}
+        for i, question in enumerate(survey_questions):
+            answer = request.form.get(f'survey_{i}')
+            if answer:
+                survey_responses[question] = answer
+        
+        # Save to database
+        email = session.get('email', '')
+        with sqlite3.connect(DB_FILE) as conn:
+            for question, answer in survey_responses.items():
+                conn.execute('INSERT INTO survey_results (email, question, answer) VALUES (?, ?, ?)', (email, question, answer))
+            conn.commit()
+        
+        return redirect(url_for('index'))
+    except Exception as e:
+        return f"Survey error: {str(e)}"
 
 import functools
 from flask import flash, send_file
