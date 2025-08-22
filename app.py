@@ -335,12 +335,13 @@ def admin_results():
                     ORDER BY id
                 ''', (email, timestamp)).fetchall()
                 
-                # Get survey responses for this email (closest to timestamp)
+                # Get UNIQUE survey responses for this email (avoid duplicates)
                 survey_responses = conn.execute('''
-                    SELECT question, answer 
+                    SELECT DISTINCT question, answer 
                     FROM survey_results 
                     WHERE email = ?
-                    ORDER BY id
+                    GROUP BY question
+                    ORDER BY MIN(id)
                 ''', (email,)).fetchall()
                 
                 # Calculate style summary
@@ -472,11 +473,13 @@ def admin_export():
                     ORDER BY id
                 ''', (email, timestamp)).fetchall()
                 
-                # Get survey responses
+                # Get UNIQUE survey responses (avoid duplicates)
                 survey_responses = conn.execute('''
-                    SELECT question, answer 
+                    SELECT DISTINCT question, answer 
                     FROM survey_results 
                     WHERE email = ?
+                    GROUP BY question
+                    ORDER BY MIN(id)
                 ''', (email,)).fetchall()
                 
                 # Calculate style scores
@@ -511,36 +514,20 @@ def admin_export():
                         'Leadership_Style': style,
                         'User_Answer': answer,
                         'Calculated_Score': mapped_score,
-                        'Transformational_Total': style_scores['Transformational'],
-                        'Democratic_Total': style_scores['Democratic'],
-                        'Charismatic_Total': style_scores['Charismatic'],
-                        'Autocratic_Total': style_scores['Autocratic'],
-                        'Laissez_Faire_Total': style_scores['Laissez-Faire'],
-                        'Situational_Total': style_scores['Situational'],
-                        'Transactional_Total': style_scores['Transactional'],
-                        'Servant_Total': style_scores['Servant'],
                         'Survey_Completed': 'Yes' if survey_responses else 'No'
                     })
                 
-                # Add survey data as separate rows
-                for survey in survey_responses:
+                # Add survey data as separate rows (only unique responses)
+                for i, survey in enumerate(survey_responses, 1):
                     export_data.append({
                         'Name': name,
                         'Email': email,
                         'Assessment_Timestamp': formatted_timestamp,
-                        'Question_Number': 'SURVEY',
+                        'Question_Number': f'SURVEY-{i}',
                         'Question_Text': survey['question'],
                         'Leadership_Style': 'Survey',
                         'User_Answer': survey['answer'],
                         'Calculated_Score': 'N/A',
-                        'Transformational_Total': '',
-                        'Democratic_Total': '',
-                        'Charismatic_Total': '',
-                        'Autocratic_Total': '',
-                        'Laissez_Faire_Total': '',
-                        'Situational_Total': '',
-                        'Transactional_Total': '',
-                        'Servant_Total': '',
                         'Survey_Completed': 'Yes'
                     })
             
